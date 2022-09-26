@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "dgSpecHash": "J6W1OWS6/3F8dsvjgDDVXZjuLJ2nhU38aRa7/t2XB5xBllGHtiWhuJwDI3/gjM1NoSHQHWEG6csL3zUegiFuWw==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\jmoran\\source\\TravelTrackAPI\\TravelTrack-API\\TravelTrack-API.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\jmoran\\.nuget\\packages\\microsoft.extensions.apidescription.server\\3.0.0\\microsoft.extensions.apidescription.server.3.0.0.nupkg.sha512",
+    "C:\\Users\\jmoran\\.nuget\\packages\\microsoft.openapi\\1.2.3\\microsoft.openapi.1.2.3.nupkg.sha512",
+    "C:\\Users\\jmoran\\.nuget\\packages\\swashbuckle.aspnetcore\\6.2.3\\swashbuckle.aspnetcore.6.2.3.nupkg.sha512",
+    "C:\\Users\\jmoran\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\6.2.3\\swashbuckle.aspnetcore.swagger.6.2.3.nupkg.sha512",
+    "C:\\Users\\jmoran\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\6.2.3\\swashbuckle.aspnetcore.swaggergen.6.2.3.nupkg.sha512",
+    "C:\\Users\\jmoran\\.nuget\\packages\\swashbuckle.aspnetcore.swaggerui\\6.2.3\\swashbuckle.aspnetcore.swaggerui.6.2.3.nupkg.sha512"
+  ],
+  "logs": []
+}
