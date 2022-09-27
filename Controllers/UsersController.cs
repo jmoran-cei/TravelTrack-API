@@ -1,9 +1,12 @@
 using TravelTrack_API.Services;
+using TravelTrack_API.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Users.Controllers;
 
 [ApiController]
+[Produces("application/json")]
+[Consumes("application/json")]
 [Route("api/[controller]")]
 public class UsersController : ControllerBase
 {
@@ -11,61 +14,72 @@ public class UsersController : ControllerBase
 
     // GET all action
     [HttpGet]
-    public ActionResult<List<TravelTrack_API.Models.User>> GetAll() =>
-        UserService.GetAll();
+    [ProducesResponseType(typeof(User[]), StatusCodes.Status200OK)]
+    public ActionResult<List<User>> GetAll() =>
+        Ok(UserService.GetAll()); // 200
 
     // GET by Username action
     [HttpGet("{username}")]
-    public ActionResult<TravelTrack_API.Models.User> Get(string username)
+    [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public ActionResult<User> Get(string username)
     {
         var user = UserService.Get(username);
 
-        if (user == null)
-            return NotFound();
+        if (user is null)
+            return NotFound(); // 404
 
-        return user;
+        return Ok(user); // 200
     }
 
     // POST action
     [HttpPost]
-    public IActionResult Create(TravelTrack_API.Models.User user)
+    [ProducesResponseType(typeof(User), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public IActionResult Create(User user)
     {
-        if (user is null) // is this fully redundant? or good practice
-            return BadRequest();
+        if (user is null)
+            return BadRequest(); // 400
 
         UserService.Add(user);
 
-        return new CreatedAtActionResult(nameof(Create), "Users", new { username = user.Username }, user);
+        return CreatedAtAction(nameof(Create), "Users", new { username = user.Username }, user); // 201
     }
 
     // PUT action
     [HttpPut("{username}")]
-    public IActionResult Update(string username, TravelTrack_API.Models.User user)
+    [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public IActionResult Update(string username, User user)
     {
         if (username != user.Username)
-            return BadRequest();
+            return BadRequest(); // 400
 
         var existingUser = UserService.Get(user.Username);
 
         if (existingUser is null)
-            return NotFound();
+            return NotFound(); // 404
 
         UserService.Update(user);
 
-        return NoContent();
+        return Ok(user); // 200
     }
 
     // DELETE action
     [HttpDelete("{username}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public IActionResult Delete(string username)
     {
         var user = UserService.Get(username);
 
         if (user is null)
-            return NotFound();
+            return NotFound(); // 404
 
         UserService.Delete(username);
 
-        return NoContent();
+        return NoContent(); // 204
     }
 }

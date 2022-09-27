@@ -4,12 +4,12 @@ namespace TravelTrack_API.Services;
 
 public static class TripService
 {
-    static List<Models.Trip>? Trips { get; }
+    static List<Trip> Trips { get; }
     static TripService()
     {
-        Trips = new List<Models.Trip>
+        Trips = new List<Trip>
         {
-            new Models.Trip
+            new Trip
             {
                 Id = 1,
                 Title = "Brothers' Anguila Trip",
@@ -20,11 +20,11 @@ public static class TripService
                 {
                     new Destination { DestinationId = "ChIJw4OtEaZjDowRZCw_jCcczqI", City = "Zemi Beach", Region = "West End", Country = "Anguilla" }
                 },
-                Members = new List<Models.User>
+                Members = new List<User>
                 {
-                    new Models.User { Username = "jmoran@ceiamerica.com", Password = "P@ssw0rd", FirstName = "Jonathan", LastName = "Moran", PictureURL = "assets/images/users/dummy1.jpg" },
-                    new Models.User { Username = "dummyuser@dummy.dum", Password = "P@ssw0rd", FirstName = "Dummy", LastName = "User", PictureURL = "assets/images/users/dummy1.jpg" },
-                    new Models.User { Username = "fakeyfake@fakey.fake", Password = "P@ssw0rd", FirstName = "Fake", LastName = "User", PictureURL = "assets/images/users/dummy1.jpg" },
+                    new User { Username = "jmoran@ceiamerica.com", Password = "P@ssw0rd", FirstName = "Jonathan", LastName = "Moran" },
+                    new User { Username = "dummyuser@dummy.dum", Password = "P@ssw0rd", FirstName = "Dummy", LastName = "User" },
+                    new User { Username = "fakeyfake@fakey.fake", Password = "P@ssw0rd", FirstName = "Fake", LastName = "User" },
                 },
                 ToDo = new List<ToDo>
                 {
@@ -35,7 +35,7 @@ public static class TripService
                 },
                 ImgURL = "assets/images/trips/anguila1.jpg"
             },
-            new Models.Trip
+            new Trip
             {
                 Id = 2,
                 Title = "Myrtle Beach and Charleston Family Vacay 2022",
@@ -47,11 +47,11 @@ public static class TripService
                     new Destination { DestinationId = "ChIJASFVO5VoAIkRGJbQtRWxD7w", City = "Myrtle Beach", Region = "South Carolina", Country = "United States" },
                     new Destination { DestinationId = "ChIJdySo3EJ6_ogRa-zhruD3-jU", City = "Charleston", Region = "South Carolina", Country = "United States" },
                 },
-                Members = new List<Models.User>
+                Members = new List<User>
                 {
-                    new Models.User { Username = "jmoran@ceiamerica.com", Password = "P@ssw0rd", FirstName = "Jonathan", LastName = "Moran", PictureURL = "assets/images/users/dummy1.jpg" },
-                    new Models.User { Username = "dummyuser@dummy.dum", Password = "P@ssw0rd", FirstName = "Dummy", LastName = "User", PictureURL = "assets/images/users/dummy1.jpg" },
-                    new Models.User { Username = "fakeyfake@fakey.fake", Password = "P@ssw0rd", FirstName = "Fake", LastName = "User", PictureURL = "assets/images/users/dummy1.jpg" },
+                    new User { Username = "jmoran@ceiamerica.com", Password = "P@ssw0rd", FirstName = "Jonathan", LastName = "Moran" },
+                    new User { Username = "dummyuser@dummy.dum", Password = "P@ssw0rd", FirstName = "Dummy", LastName = "User" },
+                    new User { Username = "fakeyfake@fakey.fake", Password = "P@ssw0rd", FirstName = "Fake", LastName = "User" },
                 },
                 ToDo = new List<ToDo>
                 {
@@ -67,9 +67,9 @@ public static class TripService
 
     }
 
-    public static List<Models.Trip> GetAll() => Trips!; // should I be implementing IAsyncEnumerable<> and reimplement everything to be async?
-    public static Models.Trip? Get(int id) => Trips?.FirstOrDefault(t => t.Id == id);
-    public static void Add(Models.Trip trip)
+    public static List<Trip> GetAll() => Trips!; // should I be implementing IAsyncEnumerable<> and reimplement everything to be async?
+    public static Trip? Get(int id) => Trips?.FirstOrDefault(t => t.Id == id);
+    public static void Add(Trip trip)
     {
         // Note: A completely unique Trip Id will be generated from the frontend (already included within the Trip object)
         Trips!.Add(trip);
@@ -84,7 +84,7 @@ public static class TripService
         Trips!.Remove(trip);
     }
 
-    public static void Update(Models.Trip trip)
+    public static void Update(Trip trip)
     {
         var index = Trips!.FindIndex(t => t.Id == trip.Id);
         if (index == -1)

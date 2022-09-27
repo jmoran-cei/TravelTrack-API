@@ -1,9 +1,12 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace TravelTrack_API.Models;
 
 public class Destination
 {
-    public string? DestinationId { get; set; }
-    public string? City { get; set; }
-    public string? Region { get; set; }
-    public string? Country { get; set; }
+    [Required]
+    public string DestinationId { get; set; } = string.Empty;
+    public string City { get; set; } = string.Empty;
+    public string Region { get; set; } = string.Empty;
+    public string Country { get; set; } = string.Empty;
 }

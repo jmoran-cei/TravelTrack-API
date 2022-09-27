@@ -1,10 +1,15 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace TravelTrack_API.Models;
 
 public class User
 {
-    public string? Username { get; set; }
-    public string? Password { get; set; }
-    public string? FirstName { get; set; }
-    public string? LastName { get; set; }
-    public string? PictureURL { get; set; }
+    [Required]
+    public string Username { get; set; } = string.Empty;
+    [Required]
+    public string Password { get; set; } = string.Empty;
+    [Required]
+    public string FirstName { get; set; } = string.Empty;
+    [Required]
+    public string LastName { get; set; } = string.Empty;
 }
