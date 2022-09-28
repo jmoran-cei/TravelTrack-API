@@ -4,6 +4,7 @@ namespace TravelTrack_API.Models;
 
 public class Trip
 {
+    [Key]
     [Required]
     public int Id { get; set; }
     [Required]

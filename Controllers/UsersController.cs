@@ -59,7 +59,7 @@ public class UsersController : ControllerBase
     }
 
     /// <summary>
-    /// Updates a trip
+    /// Updates a user
     /// </summary>
     [HttpPut("{username}")]
     [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
@@ -81,7 +81,7 @@ public class UsersController : ControllerBase
     }
 
     /// <summary>
-    /// Deletes a trip
+    /// Deletes a user
     /// </summary>
     [HttpDelete("{username}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

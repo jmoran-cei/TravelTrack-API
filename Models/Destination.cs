@@ -4,6 +4,7 @@ namespace TravelTrack_API.Models;
 
 public class Destination
 {
+    [Key]
     [Required]
     public string DestinationId { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;

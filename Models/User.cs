@@ -4,6 +4,7 @@ namespace TravelTrack_API.Models;
 
 public class User
 {
+    [Key]
     [Required]
     public string Username { get; set; } = string.Empty;
     [Required]
