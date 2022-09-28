@@ -4,21 +4,31 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Users.Controllers;
 
+/// <summary>
+/// Handles incoming user related Http Requests
+/// </summary>
 [ApiController]
 [Produces("application/json")]
 [Consumes("application/json")]
 [Route("api/[controller]")]
 public class UsersController : ControllerBase
 {
+    /// <summary>
+    /// UsersController's constructor
+    /// </summary>
     public UsersController() { }
 
-    // GET all action
+    /// <summary>
+    /// Returns all users
+    /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(User[]), StatusCodes.Status200OK)]
     public ActionResult<List<User>> GetAll() =>
         Ok(UserService.GetAll()); // 200
 
-    // GET by Username action
+    /// <summary>
+    /// Returns a user when given an existing username
+    /// </summary>
     [HttpGet("{username}")]
     [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -32,7 +42,9 @@ public class UsersController : ControllerBase
         return Ok(user); // 200
     }
 
-    // POST action
+    /// <summary>
+    /// Creates a new user
+    /// </summary>
     [HttpPost]
     [ProducesResponseType(typeof(User), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -46,7 +58,9 @@ public class UsersController : ControllerBase
         return CreatedAtAction(nameof(Create), "Users", new { username = user.Username }, user); // 201
     }
 
-    // PUT action
+    /// <summary>
+    /// Updates a trip
+    /// </summary>
     [HttpPut("{username}")]
     [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -66,7 +80,9 @@ public class UsersController : ControllerBase
         return Ok(user); // 200
     }
 
-    // DELETE action
+    /// <summary>
+    /// Deletes a trip
+    /// </summary>
     [HttpDelete("{username}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]

@@ -4,21 +4,31 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Trips.Controllers;
 
+/// <summary>
+/// Handles incoming trip related Http Requests
+/// </summary>
 [ApiController]
 [Produces("application/json")]
 [Consumes("application/json")]
 [Route("api/[controller]")]
 public class TripsController : ControllerBase
 {
+    /// <summary>
+    /// TripsController's constructor
+    /// </summary>
     public TripsController() { }
 
-    // GET all action
+    /// <summary>
+    /// Returns all trips
+    /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(Trip[]), StatusCodes.Status200OK)]
     public ActionResult<List<Trip>> GetAll() =>
         Ok(TripService.GetAll()); // 200
 
-    // GET by Id action
+    /// <summary>
+    /// Returns a trip when given a existing trip Id
+    /// </summary>
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(Trip), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -32,7 +42,9 @@ public class TripsController : ControllerBase
         return Ok(trip); // 200
     }
 
-    // POST action
+    /// <summary>
+    /// Creates a new trip
+    /// </summary>
     [HttpPost]
     [ProducesResponseType(typeof(Trip), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -46,7 +58,9 @@ public class TripsController : ControllerBase
         return CreatedAtAction(nameof(Create), "Trips", new { id = trip.Id }, trip); // 201
     }
 
-    // PUT action
+    /// <summary>
+    /// Updates a trip
+    /// </summary>
     [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -66,7 +80,9 @@ public class TripsController : ControllerBase
         return Ok(trip); // 200
     }
 
-    // DELETE action
+    /// <summary>
+    /// Deletes a trip
+    /// </summary>
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]

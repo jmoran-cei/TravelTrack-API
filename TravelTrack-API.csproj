@@ -8,9 +8,9 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <!-- 
-      Supress specific XML Documentationwarning that generated 50+ times for types and members throughout models, etc.
+      Supress specific XML Documentation warning that generated 50+ times for types and members throughout models, etc.
      -->
-    <!-- <NoWarn>1591</NoWarn> -->
+    <NoWarn>1591</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
