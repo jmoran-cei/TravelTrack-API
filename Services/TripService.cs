@@ -2,10 +2,10 @@ using TravelTrack_API.Models;
 
 namespace TravelTrack_API.Services;
 
-public class TripService : ITripService
+public class TripService: ITripService
 {
     List<Trip> Trips { get; }
-    TripService()
+    public TripService()
     {
         Trips = new List<Trip>
         {

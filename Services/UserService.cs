@@ -2,12 +2,12 @@ using TravelTrack_API.Models;
 
 namespace TravelTrack_API.Services;
 
-public class UserService : IUserService
+public class UserService: IUserService
 {
     // Note: I'm using this API for login even though its not best practice; 
     // This is for extra .Net practice while still having a functional login system
     List<User> Users { get; }
-    UserService()
+    public UserService()
     {
         Users = new List<User>
         {

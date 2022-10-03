@@ -1,5 +1,6 @@
 using System.Reflection;
 using Microsoft.OpenApi.Models;
+using TravelTrack_API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +38,9 @@ builder.Services.AddSwaggerGen(c =>
         c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory,
             $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
     });
+
+builder.Services.AddScoped<ITripService, TripService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
