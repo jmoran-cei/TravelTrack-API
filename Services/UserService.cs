@@ -2,12 +2,12 @@ using TravelTrack_API.Models;
 
 namespace TravelTrack_API.Services;
 
-public static class UserService
+public class UserService : IUserService
 {
     // Note: I'm using this API for login even though its not best practice; 
     // This is for extra .Net practice while still having a functional login system
-    static List<User> Users { get; }
-    static UserService()
+    List<User> Users { get; }
+    UserService()
     {
         Users = new List<User>
         {
@@ -17,14 +17,15 @@ public static class UserService
         };
     }
 
-    public static List<User> GetAll() => Users!;
-    public static User? Get(string username) => Users?.FirstOrDefault(u => u.Username == username);
-    public static void Add(User user)
+    public List<User> GetAll() => Users!;
+    public User Get(string username) => Users?.FirstOrDefault(u => u.Username == username)!;
+    public User Add(User user)
     {
         Users!.Add(user);
+        return user;
     }
 
-    public static void Delete(string username)
+    public void Delete(string username)
     {
         var user = Get(username);
         if (user is null)
@@ -33,12 +34,13 @@ public static class UserService
         Users!.Remove(user);
     }
 
-    public static void Update(User user)
+    public User Update(User user)
     {
         var index = Users!.FindIndex(u => u.Username == user.Username);
         if (index == -1)
-            return;
+            return user;
 
         Users[index] = user;
+        return user;
     }
 }

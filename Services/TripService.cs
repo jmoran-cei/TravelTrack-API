@@ -2,10 +2,10 @@ using TravelTrack_API.Models;
 
 namespace TravelTrack_API.Services;
 
-public static class TripService
+public class TripService : ITripService
 {
-    static List<Trip> Trips { get; }
-    static TripService()
+    List<Trip> Trips { get; }
+    TripService()
     {
         Trips = new List<Trip>
         {
@@ -67,15 +67,16 @@ public static class TripService
 
     }
 
-    public static List<Trip> GetAll() => Trips!; // should I be implementing IAsyncEnumerable<> and reimplement everything to be async?
-    public static Trip? Get(int id) => Trips?.FirstOrDefault(t => t.Id == id);
-    public static void Add(Trip trip)
+    public List<Trip> GetAll() => Trips!; // should I be implementing IAsyncEnumerable<> and reimplement everything to be async?
+    public Trip Get(int id) => Trips?.FirstOrDefault(t => t.Id == id)!;
+    public Trip Add(Trip trip)
     {
         // Note: A completely unique Trip Id will be generated from the frontend (already included within the Trip object)
         Trips!.Add(trip);
+        return trip;
     }
 
-    public static void Delete(int id)
+    public void Delete(int id)
     {
         var trip = Get(id);
         if (trip is null)
@@ -84,12 +85,13 @@ public static class TripService
         Trips!.Remove(trip);
     }
 
-    public static void Update(Trip trip)
+    public Trip Update(Trip trip)
     {
         var index = Trips!.FindIndex(t => t.Id == trip.Id);
         if (index == -1)
-            return;
+            return trip;
 
         Trips[index] = trip;
+        return trip;
     }
 }

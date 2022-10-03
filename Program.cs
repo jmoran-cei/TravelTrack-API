@@ -34,7 +34,7 @@ builder.Services.AddSwaggerGen(c =>
             Version = "v1"
         });
         c.EnableAnnotations();
-        c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, 
+        c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory,
             $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
     });
 
@@ -46,9 +46,6 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TravelTrack v1"));
-}
-else {
-    app.UseExceptionHandler("/api/error");
 }
 
 app.UseCors();
