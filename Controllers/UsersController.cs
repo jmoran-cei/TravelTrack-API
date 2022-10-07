@@ -1,5 +1,5 @@
 using TravelTrack_API.Services;
-using TravelTrack_API.Models;
+using TravelTrack_API.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Cors;
 
@@ -20,7 +20,8 @@ public class UsersController : ControllerBase
     /// <summary>
     /// UsersController's constructor
     /// </summary>
-    public UsersController(IUserService userService) {
+    public UsersController(IUserService userService)
+    {
         _userService = userService;
     }
 
@@ -30,7 +31,8 @@ public class UsersController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(User[]), StatusCodes.Status200OK)]
     public ActionResult<List<User>> GetAll() =>
-        Ok(_userService.GetAll()); // 200
+        //Ok(_userService.GetAll()); // 200
+        Ok(UserServiceTEMP.GetAll()); // 200
 
     /// <summary>
     /// Returns a user when given an existing username
@@ -40,7 +42,8 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public ActionResult<User> Get(string username)
     {
-        var user = _userService.Get(username);
+        //var user = _userService.Get(username);
+        var user = UserServiceTEMP.Get(username);
 
         if (user is null)
             return NotFound(); // 404
@@ -59,7 +62,8 @@ public class UsersController : ControllerBase
         if (user is null)
             return BadRequest(); // 400
 
-        _userService.Add(user);
+        //_userService.Add(user);
+        UserServiceTEMP.Add(user);
 
         return CreatedAtAction(nameof(Create), "Users", new { username = user.Username }, user); // 201
     }
@@ -76,12 +80,14 @@ public class UsersController : ControllerBase
         if (username != user.Username)
             return BadRequest(); // 400
 
-        var existingUser = _userService.Get(user.Username);
+        //var existingUser = _userService.Get(user.Username);
+        var existingUser = UserServiceTEMP.Get(user.Username);
 
-        //if (existingUser is null)
-            //return NotFound(); // 404
+        if (existingUser is null)
+            return NotFound(); // 404
 
-        _userService.Update(user);
+        //_userService.Update(user);
+        UserServiceTEMP.Update(user);
 
         return Ok(user); // 200
     }
@@ -95,12 +101,14 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public IActionResult Delete(string username)
     {
-        var user = _userService.Get(username);
+        //var user = _userService.Get(username);
+        var user = UserServiceTEMP.Get(username);
 
         if (user is null)
             return NotFound(); // 404
 
-        _userService.Delete(username);
+        //_userService.Delete(username);
+        UserServiceTEMP.Delete(username);
 
         return NoContent(); // 204
     }

@@ -1,4 +1,4 @@
-﻿using TravelTrack_API.Models;
+﻿using TravelTrack_API.DTO;
 
 namespace TravelTrack_API.Services
 {
@@ -8,7 +8,7 @@ namespace TravelTrack_API.Services
         List<User> GetAll();
         User Get(string username);
         User Add(User user);
-        User Update(User user);
+        User Update(string username, User user);
         void Delete(string username);
     }
 }

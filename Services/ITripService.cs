@@ -1,4 +1,4 @@
-﻿using TravelTrack_API.Models;
+﻿using TravelTrack_API.DTO;
 
 namespace TravelTrack_API.Services
 {

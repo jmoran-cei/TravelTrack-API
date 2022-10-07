@@ -2,10 +2,16 @@ using TravelTrack_API.DTO;
 
 namespace TravelTrack_API.Services;
 
-public class TripService: ITripService
+/* 
+ * NOTE: This file is being used in place of TripService.cs TEMPORARILY
+ * This file is temporarily being used to deal with static data and allow my TripController to be fully functional for the time being.
+ * The TripService.cs will be used w/ it's dependency injection for implementing automapper, context, Domain to DTO conversion
+ * This file will be deleted in the near future.
+*/
+public static class TripServiceTEMP
 {
-    List<Trip> Trips { get; }
-    public TripService()
+    static List<Trip> Trips { get; }
+    static TripServiceTEMP()
     {
         Trips = new List<Trip>
         {
@@ -93,16 +99,15 @@ public class TripService: ITripService
 
     }
 
-    public List<Trip> GetAll() => Trips!; // should I be implementing IAsyncEnumerable<> and reimplement everything to be async?
-    public Trip Get(int id) => Trips?.FirstOrDefault(t => t.Id == id)!;
-    public Trip Add(Trip trip)
+    public static List<Trip> GetAll() => Trips!; // should I be implementing IAsyncEnumerable<> and reimplement everything to be async?
+    public static Trip? Get(int id) => Trips?.FirstOrDefault(t => t.Id == id);
+    public static void Add(Trip trip)
     {
         // Note: A completely unique Trip Id will be generated from the frontend (already included within the Trip object)
-        Trips.Add(trip);
-        return trip;
+        Trips!.Add(trip);
     }
 
-    public void Delete(int id)
+    public static void Delete(int id)
     {
         var trip = Get(id);
         if (trip is null)
@@ -111,13 +116,12 @@ public class TripService: ITripService
         Trips!.Remove(trip);
     }
 
-    public Trip Update(Trip trip)
+    public static void Update(Trip trip)
     {
         var index = Trips!.FindIndex(t => t.Id == trip.Id);
         if (index == -1)
-            return trip;
+            return;
 
         Trips[index] = trip;
-        return trip;
     }
 }
