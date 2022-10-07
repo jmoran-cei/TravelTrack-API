@@ -12,8 +12,8 @@ using TravelTrack_API.DbContexts;
 namespace TravelTrack_API.Migrations
 {
     [DbContext(typeof(TravelTrackContext))]
-    [Migration("20221006132036_seedData")]
-    partial class seedData
+    [Migration("20221007211230_TravelTrackDBInitialMigration")]
+    partial class TravelTrackDBInitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -44,29 +44,6 @@ namespace TravelTrack_API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Destination");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "ChIJw4OtEaZjDowRZCw_jCcczqI",
-                            City = "Zemi Beach",
-                            Country = "Anguilla",
-                            Region = "West End"
-                        },
-                        new
-                        {
-                            Id = "ChIJASFVO5VoAIkRGJbQtRWxD7w",
-                            City = "Myrtle Beach",
-                            Country = "United States",
-                            Region = "South Carolina"
-                        },
-                        new
-                        {
-                            Id = "ChIJdySo3EJ6_ogRa-zhruD3-jU",
-                            City = "Charleston",
-                            Country = "United States",
-                            Region = "South Carolina"
-                        });
                 });
 
             modelBuilder.Entity("TravelTrack_API.Domain.ToDo", b =>
@@ -96,11 +73,11 @@ namespace TravelTrack_API.Migrations
 
             modelBuilder.Entity("TravelTrack_API.Domain.Trip", b =>
                 {
-                    b.Property<long>("TripId")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("TripId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
 
                     b.Property<string>("Details")
                         .IsRequired()
@@ -120,38 +97,9 @@ namespace TravelTrack_API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("TripId");
+                    b.HasKey("Id");
 
                     b.ToTable("Trips");
-
-                    b.HasData(
-                        new
-                        {
-                            TripId = 1L,
-                            Details = "Oremlay ipsumyay olorday itsay ametyay, onsectetuercay adipiscingyay elityay. Edsay itaevay eolay inyay iamday empersay orttitorpay. Ullamnay idyay augueyay. Aecenasmay atyay acuslay isquay islnay auctoryay imperdietyay. Integeryay incidunttay acinialay elitvay. Uspendissesay aretraphay. Uisday ariusvay. Ellentesquepay abitanthay orbimay istiquetray enectussay etyay etusnay etyay alesuadamay amesfay acyay urpistay egestasyay.",
-                            EndDate = new DateTime(2022, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            ImgURL = "assets/images/trips/anguila1.jpg",
-                            StartDate = new DateTime(2022, 3, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Title = "Brothers' Anguila Trip"
-                        },
-                        new
-                        {
-                            TripId = 2L,
-                            Details = "Oremlay ipsumyay olorday itsay ametyay, onsectetuercay adipiscingyay elityay. Edsay itaevay eolay inyay iamday empersay orttitorpay. Ullamnay idyay augueyay. Aecenasmay atyay acuslay isquay islnay auctoryay imperdietyay. Integeryay incidunttay acinialay elitvay. Uspendissesay aretraphay. Uisday ariusvay. Ellentesquepay abitanthay orbimay istiquetray enectussay etyay etusnay etyay alesuadamay amesfay acyay urpistay egestasyay.",
-                            EndDate = new DateTime(2022, 6, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            ImgURL = "assets/images/trips/myrtlebeach1.jpg",
-                            StartDate = new DateTime(2022, 5, 27, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Title = "Myrtle Beach and Charleston Family Vacay 2022"
-                        },
-                        new
-                        {
-                            TripId = 3L,
-                            Details = "",
-                            EndDate = new DateTime(2024, 8, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            ImgURL = "assets/images/trips/myrtlebeach1.jpg",
-                            StartDate = new DateTime(2024, 7, 19, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Title = "Another Test Trip"
-                        });
                 });
 
             modelBuilder.Entity("TravelTrack_API.Domain.TripDestination", b =>
@@ -204,29 +152,6 @@ namespace TravelTrack_API.Migrations
                     b.HasKey("Username");
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            Username = "jmoran@ceiamerica.com",
-                            FirstName = "Jonathan",
-                            LastName = "Moran",
-                            Password = "P@ssw0rd"
-                        },
-                        new
-                        {
-                            Username = "dummyuser@dummy.dum",
-                            FirstName = "Dummy",
-                            LastName = "User",
-                            Password = "P@ssw0rd"
-                        },
-                        new
-                        {
-                            Username = "fakeyfake@fakey.fake",
-                            FirstName = "Fake",
-                            LastName = "User",
-                            Password = "P@ssw0rd"
-                        });
                 });
 
             modelBuilder.Entity("TravelTrack_API.Domain.ToDo", b =>

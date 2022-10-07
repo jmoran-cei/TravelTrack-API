@@ -29,7 +29,7 @@ public class ToDo
     public string Task { get; set; } = string.Empty;
     public bool Complete { get; set; }
     public long TripId { get; set; }
-    public Trip Trip { get; set; } = new Trip();
+    public Trip Trip { get; set; } = null!;
 }
 
 public class Destination

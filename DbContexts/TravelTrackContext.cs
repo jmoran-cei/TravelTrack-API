@@ -60,11 +60,6 @@ public class TravelTrackContext : DbContext
                 StartDate = new DateTime(2022, 3, 15),
                 EndDate = new DateTime(2022, 3, 20),
                 ImgURL = "assets/images/trips/anguila1.jpg",
-                //ToDo =
-                //{
-                //    new ToDo { Id = 1, Task = "buy new swim trunks", Complete = true },
-                //    new ToDo { Id = 2, Task = "buy new swim trunks", Complete = true }
-                //}
             },
             new Trip
             {
@@ -74,11 +69,6 @@ public class TravelTrackContext : DbContext
                 StartDate = new DateTime(2022, 5, 27),
                 EndDate = new DateTime(2022, 6, 5),
                 ImgURL = "assets/images/trips/myrtlebeach1.jpg",
-                //ToDo =
-                //{
-                //    new ToDo { Id = 3, Task = "buy new swim trunks", Complete = true },
-                //    new ToDo { Id = 4, Task = "buy new swim trunks", Complete = true }
-                //}
             },
             new Trip
             {
@@ -119,8 +109,7 @@ public class TravelTrackContext : DbContext
 
         var toDo = new ToDo[]
         {
-            //new ToDo { Id = 1, Task = "buy new swim trunks", Complete = true, Trip = trips.FirstOrDefault(x => x.Id == 1) },
-            new ToDo { Id = 1, Task = "buy new swim trunks", Complete = true },
+            new ToDo { Id = 1, TripId = 1, Task = "buy new swim trunks", Complete = true },
             new ToDo { Id = 2, TripId = 1, Task = "pack beach towels", Complete = true },
             new ToDo { Id = 3, TripId = 2, Task = "buy new swim trunks", Complete = true },
             new ToDo { Id = 4, TripId = 2, Task = "buy new swim trunks", Complete = true }
@@ -130,7 +119,7 @@ public class TravelTrackContext : DbContext
         {
             new User { Username = "jmoran@ceiamerica.com", Password = "P@ssw0rd", FirstName = "Jonathan", LastName = "Moran" },
             new User { Username = "dummyuser@dummy.dum", Password = "P@ssw0rd", FirstName = "Dummy", LastName = "User" },
-            new User { Username = "fakeyfake@fakey.fake", Password = "P@ssw0rd", FirstName = "Fake", LastName = "User" }
+            new User { Username = "fakeuser@fakey.fake", Password = "P@ssw0rd", FirstName = "Fake", LastName = "User" }
         };
 
         bldr.Entity<Trip>()
@@ -139,18 +128,17 @@ public class TravelTrackContext : DbContext
         bldr.Entity<User>()
             .HasData(users);
 
-        //bldr.Entity<TripUser>() // currently causes error when adding migration
-        //    .HasData(tripMembers);
+        bldr.Entity<TripUser>()
+            .HasData(tripMembers);
 
         bldr.Entity<Destination>()
             .HasData(destinations);
 
-        //bldr.Entity<TripDestination>() // currently causes error when adding migration
-        //    .HasData(tripDestinations);
+        bldr.Entity<TripDestination>()
+            .HasData(tripDestinations);
 
-        //bldr.Entity<ToDo>() // currently causes error when adding migration
-        //    .HasData(toDo);
-
+        bldr.Entity<ToDo>()
+            .HasData(toDo);
 
         base.OnModelCreating(bldr);
     }
