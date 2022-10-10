@@ -2,12 +2,18 @@ using TravelTrack_API.DTO;
 
 namespace TravelTrack_API.Services;
 
-public class UserService: IUserService
+/* 
+ * NOTE: This file is being used in place of UserService.cs TEMPORARILY
+ * This file is temporarily being used to deal with static data and allow my UserController to be fully functional for the time being.
+ * The UserService.cs will be used w/ it's dependency injection for implementing automapper, context, Domain to DTO conversion
+ * This file will be deleted in the near future.
+*/
+public static class UserServiceTEMP
 {
     // Note: I'm using this API for login even though its not best practice; 
     // This is for extra .Net practice while still having a functional login system
-    List<UserDto> Users { get; }
-    public UserService()
+    static List<UserDto> Users { get; }
+    static UserServiceTEMP()
     {
         Users = new List<UserDto>
         {
@@ -17,15 +23,15 @@ public class UserService: IUserService
         };
     }
 
-    public List<UserDto> GetAll() => Users!;
-    public UserDto Get(string username) => Users?.FirstOrDefault(u => u.Username == username)!;
-    public UserDto Add(UserDto user)
+    public static List<UserDto> GetAll() => Users!;
+    public static UserDto Get(string username) => Users?.FirstOrDefault(u => u.Username == username)!;
+    public static UserDto Add(UserDto user)
     {
         Users!.Add(user);
         return user;
     }
 
-    public void Delete(string username)
+    public static void Delete(string username)
     {
         var user = Get(username);
         if (user is null)
@@ -34,7 +40,7 @@ public class UserService: IUserService
         Users!.Remove(user);
     }
 
-    public UserDto Update(string username, UserDto user)
+    public static UserDto Update(UserDto user)
     {
         var index = Users!.FindIndex(u => u.Username == user.Username);
         if (index == -1)

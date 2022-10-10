@@ -1,14 +1,14 @@
-﻿using TravelTrack_API.Models;
+﻿using TravelTrack_API.DTO;
 
 namespace TravelTrack_API.Services
 {
     public interface IUserService
     {
         // unused interface until context, DTOs, and mapper become implemented with EF
-        List<User> GetAll();
-        User Get(string username);
-        User Add(User user);
-        User Update(User user);
+        List<UserDto> GetAll();
+        UserDto Get(string username);
+        UserDto Add(UserDto user);
+        UserDto Update(string username, UserDto user);
         void Delete(string username);
     }
 }

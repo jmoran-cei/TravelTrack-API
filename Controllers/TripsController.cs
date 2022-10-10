@@ -1,5 +1,5 @@
 using TravelTrack_API.Services;
-using TravelTrack_API.Models;
+using TravelTrack_API.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Cors;
 
@@ -15,12 +15,13 @@ namespace Trips.Controllers;
 [EnableCors()]
 public class TripsController : ControllerBase
 {
-
     private readonly ITripService _tripService;
+
     /// <summary>
     /// TripsController's constructor
     /// </summary>
-    public TripsController(ITripService tripService) {
+    public TripsController(ITripService tripService)
+    {
         _tripService = tripService;
     }
 
@@ -28,19 +29,21 @@ public class TripsController : ControllerBase
     /// Returns all trips
     /// </summary>
     [HttpGet]
-    [ProducesResponseType(typeof(Trip[]), StatusCodes.Status200OK)]
-    public ActionResult<List<Trip>> GetAll() =>
+    [ProducesResponseType(typeof(TripDto[]), StatusCodes.Status200OK)]
+    public ActionResult<List<TripDto>> GetAll() =>
         Ok(_tripService.GetAll()); // 200
+        //Ok(TripServiceTEMP.GetAll()); // 200
 
     /// <summary>
     /// Returns a trip when given a existing trip Id
     /// </summary>
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(Trip), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(TripDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    public ActionResult<Trip> Get(int id)
+    public ActionResult<TripDto> Get(long id)
     {
-        var trip = _tripService.Get(id);
+        //var trip = _tripService.Get(id);
+        var trip = TripServiceTEMP.Get(id);
 
         if (trip is null)
             return NotFound(); // 404
@@ -52,14 +55,15 @@ public class TripsController : ControllerBase
     /// Creates a new trip
     /// </summary>
     [HttpPost]
-    [ProducesResponseType(typeof(Trip), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(TripDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public IActionResult Create(Trip trip)
+    public IActionResult Create(TripDto trip)
     {
         if (trip is null)
             return BadRequest(); // 400
 
-        _tripService.Add(trip);
+        //_tripService.Add(trip);
+        TripServiceTEMP.Add(trip);
 
         return CreatedAtAction(nameof(Create), "Trips", new { id = trip.Id }, trip); // 201
     }
@@ -71,17 +75,19 @@ public class TripsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    public IActionResult Update(int id, Trip trip)
+    public IActionResult Update(long id, TripDto trip)
     {
         if (id != trip.Id)
             return BadRequest(); // 400
 
-        var existingTrip = _tripService.Get(trip.Id);
+        //var existingTrip = _tripService.Get(trip.Id);
+        var existingTrip = TripServiceTEMP.Get(trip.Id);
 
         if (existingTrip is null)
             return NotFound(); // 404
 
-        _tripService.Update(trip);
+        //_tripService.Update(trip);
+        TripServiceTEMP.Update(trip);
 
         return Ok(trip); // 200
     }
@@ -93,14 +99,16 @@ public class TripsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    public IActionResult Delete(int id)
+    public IActionResult Delete(long id)
     {
-        var trip = _tripService.Get(id)!;
+        //var trip = _tripService.Get(id)!;
+        var trip = TripServiceTEMP.Get(id)!;
 
         if (trip is null)
             return NotFound(); // 404
 
-        _tripService.Delete(id);
+        //_tripService.Delete(id);
+        TripServiceTEMP.Delete(id);
 
         return NoContent(); // 204
     }
