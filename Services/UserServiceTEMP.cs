@@ -12,20 +12,20 @@ public static class UserServiceTEMP
 {
     // Note: I'm using this API for login even though its not best practice; 
     // This is for extra .Net practice while still having a functional login system
-    static List<User> Users { get; }
+    static List<UserDto> Users { get; }
     static UserServiceTEMP()
     {
-        Users = new List<User>
+        Users = new List<UserDto>
         {
-            new User { Username = "jmoran@ceiamerica.com", Password = "P@ssw0rd", FirstName = "Jonathan", LastName = "Moran" },
-            new User { Username = "dummyuser@dummy.dum", Password = "P@ssw0rd", FirstName = "Dummy", LastName = "User" },
-            new User { Username = "fakeyfake@fakey.fake", Password = "P@ssw0rd", FirstName = "Fake", LastName = "User" },
+            new UserDto { Username = "jmoran@ceiamerica.com", Password = "P@ssw0rd", FirstName = "Jonathan", LastName = "Moran" },
+            new UserDto { Username = "dummyuser@dummy.dum", Password = "P@ssw0rd", FirstName = "Dummy", LastName = "User" },
+            new UserDto { Username = "fakeyfake@fakey.fake", Password = "P@ssw0rd", FirstName = "Fake", LastName = "User" },
         };
     }
 
-    public static List<User> GetAll() => Users!;
-    public static User Get(string username) => Users?.FirstOrDefault(u => u.Username == username)!;
-    public static User Add(User user)
+    public static List<UserDto> GetAll() => Users!;
+    public static UserDto Get(string username) => Users?.FirstOrDefault(u => u.Username == username)!;
+    public static UserDto Add(UserDto user)
     {
         Users!.Add(user);
         return user;
@@ -40,7 +40,7 @@ public static class UserServiceTEMP
         Users!.Remove(user);
     }
 
-    public static User Update(User user)
+    public static UserDto Update(UserDto user)
     {
         var index = Users!.FindIndex(u => u.Username == user.Username);
         if (index == -1)

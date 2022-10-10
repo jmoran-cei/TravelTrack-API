@@ -29,18 +29,18 @@ public class TripsController : ControllerBase
     /// Returns all trips
     /// </summary>
     [HttpGet]
-    [ProducesResponseType(typeof(Trip[]), StatusCodes.Status200OK)]
-    public ActionResult<List<Trip>> GetAll() =>
-        //Ok(_tripService.GetAll()); // 200
-        Ok(TripServiceTEMP.GetAll()); // 200
+    [ProducesResponseType(typeof(TripDto[]), StatusCodes.Status200OK)]
+    public ActionResult<List<TripDto>> GetAll() =>
+        Ok(_tripService.GetAll()); // 200
+        //Ok(TripServiceTEMP.GetAll()); // 200
 
     /// <summary>
     /// Returns a trip when given a existing trip Id
     /// </summary>
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(Trip), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(TripDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    public ActionResult<Trip> Get(int id)
+    public ActionResult<TripDto> Get(long id)
     {
         //var trip = _tripService.Get(id);
         var trip = TripServiceTEMP.Get(id);
@@ -55,9 +55,9 @@ public class TripsController : ControllerBase
     /// Creates a new trip
     /// </summary>
     [HttpPost]
-    [ProducesResponseType(typeof(Trip), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(TripDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public IActionResult Create(Trip trip)
+    public IActionResult Create(TripDto trip)
     {
         if (trip is null)
             return BadRequest(); // 400
@@ -75,7 +75,7 @@ public class TripsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    public IActionResult Update(int id, Trip trip)
+    public IActionResult Update(long id, TripDto trip)
     {
         if (id != trip.Id)
             return BadRequest(); // 400
@@ -99,7 +99,7 @@ public class TripsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    public IActionResult Delete(int id)
+    public IActionResult Delete(long id)
     {
         //var trip = _tripService.Get(id)!;
         var trip = TripServiceTEMP.Get(id)!;

@@ -29,8 +29,8 @@ public class UsersController : ControllerBase
     /// Returns all users
     /// </summary>
     [HttpGet]
-    [ProducesResponseType(typeof(User[]), StatusCodes.Status200OK)]
-    public ActionResult<List<User>> GetAll() =>
+    [ProducesResponseType(typeof(UserDto[]), StatusCodes.Status200OK)]
+    public ActionResult<List<UserDto>> GetAll() =>
         //Ok(_userService.GetAll()); // 200
         Ok(UserServiceTEMP.GetAll()); // 200
 
@@ -38,9 +38,9 @@ public class UsersController : ControllerBase
     /// Returns a user when given an existing username
     /// </summary>
     [HttpGet("{username}")]
-    [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    public ActionResult<User> Get(string username)
+    public ActionResult<UserDto> Get(string username)
     {
         //var user = _userService.Get(username);
         var user = UserServiceTEMP.Get(username);
@@ -55,9 +55,9 @@ public class UsersController : ControllerBase
     /// Creates a new user
     /// </summary>
     [HttpPost]
-    [ProducesResponseType(typeof(User), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(UserDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public IActionResult Create(User user)
+    public IActionResult Create(UserDto user)
     {
         if (user is null)
             return BadRequest(); // 400
@@ -72,10 +72,10 @@ public class UsersController : ControllerBase
     /// Updates a user
     /// </summary>
     [HttpPut("{username}")]
-    [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    public IActionResult Update(string username, User user)
+    public IActionResult Update(string username, UserDto user)
     {
         if (username != user.Username)
             return BadRequest(); // 400

@@ -4,11 +4,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TravelTrack_API.DTO;
 
-public class Trip
+public class TripDto
 {
     [Key]
     [Required]  
-    public int Id { get; set; }
+    public long Id { get; set; }
     [Required]
     public string Title { get; set; } = string.Empty;
     public string Details { get; set; } = string.Empty;
@@ -17,22 +17,22 @@ public class Trip
     [Required]
     public DateTime EndDate { get; set; }
     [Required]
-    public List<Destination> Destinations { get; set; } = new List<Destination>();
+    public List<DestinationDto> Destinations { get; set; } = new List<DestinationDto>();
     [Required]
-    public List<TripUser> Members { get; set; } = new List<TripUser>();
-    public List<ToDo> ToDo { get; set; } = new List<ToDo>();
+    public List<TripUserDto> Members { get; set; } = new List<TripUserDto>();
+    public List<ToDoDto> ToDo { get; set; } = new List<ToDoDto>();
     [Required]
     public string ImgURL { get; set; } = string.Empty;
 }
 
-public class ToDo
+public class ToDoDto
 {
     public int Id { get; set; }
     public string Task { get; set; } = string.Empty;
     public bool Complete { get; set; }
 }
 
-public class Destination
+public class DestinationDto
 {
     [Required]
     public string Id { get; set; } = string.Empty;

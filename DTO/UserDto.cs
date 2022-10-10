@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TravelTrack_API.DTO;
 
-public class User
+public class UserDto
 {
     [Key]
     [Required]
