@@ -76,13 +76,6 @@ public class UsersController : ControllerBase
             }
             return new BadRequestObjectResult(e.Response); // 400
         }
-        if (user is null)
-            return BadRequest(); // 400
-
-        //_userService.Add(user);
-        UserServiceTEMP.Add(user);
-
-        return CreatedAtAction(nameof(Create), "Users", new { username = user.Username }, user); // 201
     }
 
     /// <summary>
