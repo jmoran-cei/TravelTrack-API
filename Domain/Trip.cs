@@ -17,10 +17,15 @@ public class Trip
     [Required]
     public string ImgURL { get; set; } = string.Empty;
     [Required]
-    public List<TripDestination> Destinations { get; set; } = new List<TripDestination>();
+    public List<TripDestination> Destinations { get; set; }
     [Required]
-    public List<TripUser> Members { get; set; } = new List<TripUser>();
+    public List<TripUser> Members { get; set; }
     public List<ToDo> ToDo { get; set; } = new List<ToDo>();
+    public Trip()
+    {
+        Destinations = new List<TripDestination>();
+        Members = new List<TripUser>();
+    }
 }
 
 public class ToDo

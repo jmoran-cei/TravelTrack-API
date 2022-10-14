@@ -11,10 +11,15 @@ public class TripDto
     public string Details { get; set; } = string.Empty;
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
-    public List<DestinationDto> Destinations { get; set; } = new List<DestinationDto>();
-    public List<TripUserDto> Members { get; set; } = new List<TripUserDto>();
+    public List<DestinationDto> Destinations { get; set; }
+    public List<TripUserDto> Members { get; set; }
     public List<ToDoDto> ToDo { get; set; } = new List<ToDoDto>();
     public string ImgURL { get; set; } = string.Empty;
+    public TripDto()
+    {
+        Destinations = new List<DestinationDto>();
+        Members = new List<TripUserDto>();
+    }
 }
 
 public class ToDoDto
