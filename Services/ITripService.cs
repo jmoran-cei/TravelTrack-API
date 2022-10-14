@@ -8,7 +8,7 @@ namespace TravelTrack_API.Services
         List<TripDto> GetAll();
         TripDto Get(long id);
         TripDto Add(TripDto trip);
-        TripDto Update(TripDto trip);
+        TripDto Update(long id, TripDto trip);
         void Delete(long id);
     }
 }
