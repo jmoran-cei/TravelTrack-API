@@ -207,7 +207,7 @@ public class TripService : ITripService
 
         _ctx.TripDestinations.RemoveRange(existingTrip.Destinations);
         _ctx.TripUsers.RemoveRange(existingTrip.Members);
-        _ctx.ToDos.RemoveRange(existingTrip.ToDo);
+        _ctx.ToDo.RemoveRange(existingTrip.ToDo);
 
         foreach (DestinationDto destination in trip.Destinations)
         {

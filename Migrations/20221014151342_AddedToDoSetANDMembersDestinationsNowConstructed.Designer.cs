@@ -12,8 +12,8 @@ using TravelTrack_API.DbContexts;
 namespace TravelTrack_API.Migrations
 {
     [DbContext(typeof(TravelTrackContext))]
-    [Migration("20221013224403_AddedToDosSetANDMembersDestinationsNowConstructed")]
-    partial class AddedToDosSetANDMembersDestinationsNowConstructed
+    [Migration("20221014151342_AddedToDoSetANDMembersDestinationsNowConstructed")]
+    partial class AddedToDoSetANDMembersDestinationsNowConstructed
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -91,7 +91,7 @@ namespace TravelTrack_API.Migrations
 
                     b.HasIndex("TripId");
 
-                    b.ToTable("ToDos");
+                    b.ToTable("ToDo");
 
                     b.HasData(
                         new

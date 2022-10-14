@@ -10,7 +10,7 @@ public class TravelTrackContext : DbContext
     public DbSet<TripUser> TripUsers { get; set; } = null!;
     public DbSet<Destination> Destinations { get; set; } = null!;
     public DbSet<TripDestination> TripDestinations { get; set; } = null!;
-    public DbSet<ToDo> ToDos { get; set; } = null!;
+    public DbSet<ToDo> ToDo { get; set; } = null!;
 
     public TravelTrackContext(DbContextOptions<TravelTrackContext> options) : base(options)
     {

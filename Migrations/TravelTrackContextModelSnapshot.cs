@@ -89,7 +89,7 @@ namespace TravelTrack_API.Migrations
 
                     b.HasIndex("TripId");
 
-                    b.ToTable("ToDos");
+                    b.ToTable("ToDo");
 
                     b.HasData(
                         new

@@ -4,7 +4,7 @@
 
 namespace TravelTrack_API.Migrations
 {
-    public partial class AddedToDosSetANDMembersDestinationsNowConstructed : Migration
+    public partial class AddedToDoSetANDMembersDestinationsNowConstructed : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
