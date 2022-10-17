@@ -13,6 +13,7 @@ namespace Trips.Controllers;
 [Consumes("application/json")]
 [Route("api/[controller]")]
 [EnableCors()]
+[ApiVersion("1.0")]
 public class TripsController : ControllerBase
 {
 

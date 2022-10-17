@@ -13,6 +13,7 @@ namespace Users.Controllers;
 [Consumes("application/json")]
 [Route("api/[controller]")]
 [EnableCors()]
+[ApiVersion("1.0")]
 public class UsersController : ControllerBase
 {
     private readonly IUserService _userService;

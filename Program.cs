@@ -1,4 +1,6 @@
 using System.Reflection;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.OpenApi.Models;
 using TravelTrack_API.Authorization;
 using TravelTrack_API.Services;
@@ -64,7 +66,27 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddScoped<ITripService, TripService>();
-builder.Services.AddScoped<IUserService, UserService>(); 
+builder.Services.AddScoped<IUserService, UserService>();
+
+// NOTE: I'll actually apply a new version when/if I end up adding Trip Photos as a new Trip property ( not my highest priority.. need to get some experience testing soon )
+// Also, I was going to implement Uri versioning, but learned it is often more useful for new entity versioning rather than format versioning (which is more of my case)
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true; // "api-supported-versions: 1.0"
+
+    // QUESTION: Would it be better practice to use ApiVersion.Combine() and also add QueryStringApiversionReader (or even media type) as well?
+    // is it seen as redundant? or is it something that is nice to have because it allows for different ways of version specification? I assume the latter but am unsure.
+    options.ApiVersionReader = new HeaderApiVersionReader("X-Api-Version");
+});
+
+builder.Services.AddVersionedApiExplorer(
+    options =>
+    {
+        options.GroupNameFormat = "'v'VVV";
+    });
+
 
 var app = builder.Build();
 
