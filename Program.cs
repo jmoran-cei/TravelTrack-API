@@ -1,5 +1,6 @@
 using System.Reflection;
 using Microsoft.OpenApi.Models;
+using TravelTrack_API.Authorization;
 using TravelTrack_API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,26 +22,49 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
     {
-        c.SwaggerDoc("v1", new OpenApiInfo
+        Title = "TravelTrack API",
+        Description = "An ASP.NET Core Web API for TravelTrack",
+        Contact = new OpenApiContact
         {
-            Title = "TravelTrack API",
-            Description = "An ASP.NET Core Web API for TravelTrack",
-            Contact = new OpenApiContact
-            {
-                Name = "Jon Moran",
-                Email = "jmoran@ceiamerica.com",
-                Url = new Uri("https://www.ceiamerica.com/")
-            },
-            Version = "v1"
-        });
-        c.EnableAnnotations();
-        c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory,
-            $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
+            Name = "Jon Moran",
+            Email = "jmoran@ceiamerica.com",
+            Url = new Uri("https://www.ceiamerica.com/")
+        },
+        Version = "v1"
     });
 
+    // API Key in Swagger
+    c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+    {
+        Description = "The Api Key must be present in the header",
+        Type = SecuritySchemeType.ApiKey,
+        Name = "X-Api-Key",
+        In = ParameterLocation.Header,
+        Scheme = "ApiKeyScheme"
+    });
+    var key = new OpenApiSecurityScheme()
+    {
+        Reference = new OpenApiReference
+        {
+            Type = ReferenceType.SecurityScheme,
+            Id = "ApiKey"
+        },
+        In = ParameterLocation.Header
+    };
+    // It'll prompt the developer for the key value when needing authorization
+    var requirement = new OpenApiSecurityRequirement { { key, new List<string>() } };
+    c.AddSecurityRequirement(requirement);
+
+    c.EnableAnnotations();
+    c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory,
+        $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
+});
+
 builder.Services.AddScoped<ITripService, TripService>();
-builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserService, UserService>(); 
 
 var app = builder.Build();
 
@@ -52,9 +76,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TravelTrack v1"));
 }
 
-app.UseCors();
+app.UseMiddleware<ApiKeyMiddleware>();
 
 app.UseHttpsRedirection();
+
+app.UseCors();
 
 app.UseAuthorization();
 
