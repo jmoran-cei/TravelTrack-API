@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace TravelTrack_API.Models;
+namespace TravelTrack_API.Domain;
 
 public class User
 {
@@ -13,4 +13,5 @@ public class User
     public string FirstName { get; set; } = string.Empty;
     [Required]
     public string LastName { get; set; } = string.Empty;
+    public List<TripUser> Trips { get; set; } = new List<TripUser>();
 }

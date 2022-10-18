@@ -1,8 +1,10 @@
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using TravelTrack_API.Authorization;
+using TravelTrack_API.DbContexts;
 using TravelTrack_API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -64,6 +66,9 @@ builder.Services.AddSwaggerGen(c =>
     c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory,
         $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
 });
+
+builder.Services
+    .AddDbContext<TravelTrackContext>(dbContextOptions => dbContextOptions.UseSqlServer("Server=localhost;Database=TravelTrackDB;Trusted_Connection=True;"));
 
 builder.Services.AddScoped<ITripService, TripService>();
 builder.Services.AddScoped<IUserService, UserService>();
