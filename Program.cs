@@ -98,11 +98,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TravelTrack v1"));
 }
 
-app.UseMiddleware<ApiKeyMiddleware>();
+app.UseCors();
 
 app.UseHttpsRedirection();
 
-app.UseCors();
+app.UseMiddleware<ApiKeyMiddleware>();
 
 app.UseAuthorization();
 
