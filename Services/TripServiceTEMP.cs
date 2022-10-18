@@ -2,10 +2,16 @@ using TravelTrack_API.DTO;
 
 namespace TravelTrack_API.Services;
 
-public class TripService: ITripService
+/* 
+ * NOTE: This file is being used in place of TripService.cs TEMPORARILY
+ * This file is temporarily being used to deal with static data and allow my TripController to be fully functional for the time being.
+ * The TripService.cs will be used w/ it's dependency injection for implementing automapper, context, Domain to DTO conversion
+ * This file will be deleted in the near future.
+*/
+public static class TripServiceTEMP
 {
-    List<TripDto> Trips { get; }
-    public TripService()
+    static List<TripDto> Trips { get; }
+    static TripServiceTEMP()
     {
         Trips = new List<TripDto>
         {
@@ -90,17 +96,18 @@ public class TripService: ITripService
                 ImgURL = "assets/images/trips/myrtlebeach1.jpg"
             }
         };
+
     }
 
-    public List<TripDto> GetAll() => Trips!; 
-    public TripDto Get(long id) => Trips?.FirstOrDefault(t => t.Id == id)!;
-    public TripDto Add(TripDto trip)
+    public static List<TripDto> GetAll() => Trips!; // should I be implementing IAsyncEnumerable<> and reimplement everything to be async?
+    public static TripDto? Get(long id) => Trips?.FirstOrDefault(t => t.Id == id);
+    public static void Add(TripDto trip)
     {
-        Trips.Add(trip);
-        return trip;
+        // Note: A completely unique Trip Id will be generated from the frontend (already included within the Trip object)
+        Trips!.Add(trip);
     }
 
-    public void Delete(long id)
+    public static void Delete(long id)
     {
         var trip = Get(id);
         if (trip is null)
@@ -109,13 +116,12 @@ public class TripService: ITripService
         Trips!.Remove(trip);
     }
 
-    public TripDto Update(TripDto trip)
+    public static void Update(TripDto trip)
     {
         var index = Trips!.FindIndex(t => t.Id == trip.Id);
         if (index == -1)
-            return trip;
+            return;
 
         Trips[index] = trip;
-        return trip;
     }
 }
