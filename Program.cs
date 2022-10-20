@@ -1,6 +1,9 @@
 using System.Reflection;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using TravelTrack_API.Authorization;
 using TravelTrack_API.DbContexts;
 using TravelTrack_API.Services;
 
@@ -13,7 +16,7 @@ builder.Services.AddCors(options =>
         {
             policy.WithOrigins("http://localhost:4200");
             policy.WithMethods("GET", "POST", "OPTIONS", "PUT", "DELETE");
-            policy.WithHeaders("Content-Type");
+            policy.WithHeaders("Content-Type", "X-Api-Key", "X-Api-Version");
         });
 });
 
@@ -23,23 +26,46 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
     {
-        c.SwaggerDoc("v1", new OpenApiInfo
+        Title = "TravelTrack API",
+        Description = "An ASP.NET Core Web API for TravelTrack",
+        Contact = new OpenApiContact
         {
-            Title = "TravelTrack API",
-            Description = "An ASP.NET Core Web API for TravelTrack",
-            Contact = new OpenApiContact
-            {
-                Name = "Jon Moran",
-                Email = "jmoran@ceiamerica.com",
-                Url = new Uri("https://www.ceiamerica.com/")
-            },
-            Version = "v1"
-        });
-        c.EnableAnnotations();
-        c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory,
-            $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
+            Name = "Jon Moran",
+            Email = "jmoran@ceiamerica.com",
+            Url = new Uri("https://www.ceiamerica.com/")
+        },
+        Version = "v1"
     });
+
+    // API Key in Swagger
+    c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+    {
+        Description = "The Api Key must be present in the header",
+        Type = SecuritySchemeType.ApiKey,
+        Name = "X-Api-Key",
+        In = ParameterLocation.Header,
+        Scheme = "ApiKeyScheme"
+    });
+    var key = new OpenApiSecurityScheme()
+    {
+        Reference = new OpenApiReference
+        {
+            Type = ReferenceType.SecurityScheme,
+            Id = "ApiKey"
+        },
+        In = ParameterLocation.Header
+    };
+    // It'll prompt the developer for the key value when needing authorization
+    var requirement = new OpenApiSecurityRequirement { { key, new List<string>() } };
+    c.AddSecurityRequirement(requirement);
+
+    c.EnableAnnotations();
+    c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory,
+        $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
+});
 
 builder.Services
     .AddDbContext<TravelTrackContext>(dbContextOptions => dbContextOptions.UseSqlServer("Server=localhost;Database=TravelTrackDB;Trusted_Connection=True;"));
@@ -47,6 +73,26 @@ builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddScoped<ITripService, TripService>();
 builder.Services.AddScoped<IUserService, UserService>();
+
+// NOTE: I'll actually apply a new version when/if I end up adding Trip Photos as a new Trip property ( not my highest priority.. need to get some experience testing soon )
+// Also, I was going to implement Uri versioning, but learned it is often more useful for new entity versioning rather than format versioning (which is more of my case)
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true; // "api-supported-versions: 1.0"
+
+    // QUESTION: Would it be better practice to use ApiVersion.Combine() and also add QueryStringApiversionReader (or even media type) as well?
+    // is it seen as redundant? or is it something that is nice to have because it allows for different ways of version specification? I assume the latter but am unsure.
+    options.ApiVersionReader = new HeaderApiVersionReader("X-Api-Version");
+});
+
+builder.Services.AddVersionedApiExplorer(
+    options =>
+    {
+        options.GroupNameFormat = "'v'VVV";
+    });
+
 
 var app = builder.Build();
 
@@ -61,6 +107,8 @@ if (app.Environment.IsDevelopment())
 app.UseCors();
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<ApiKeyMiddleware>();
 
 app.UseAuthorization();
 
