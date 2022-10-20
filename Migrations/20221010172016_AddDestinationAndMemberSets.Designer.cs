@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TravelTrack_API.DbContexts;
 
@@ -11,9 +12,10 @@ using TravelTrack_API.DbContexts;
 namespace TravelTrack_API.Migrations
 {
     [DbContext(typeof(TravelTrackContext))]
-    partial class TravelTrackContextModelSnapshot : ModelSnapshot
+    [Migration("20221010172016_AddDestinationAndMemberSets")]
+    partial class AddDestinationAndMemberSets
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,7 +43,7 @@ namespace TravelTrack_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Destinations");
+                    b.ToTable("Destination");
 
                     b.HasData(
                         new

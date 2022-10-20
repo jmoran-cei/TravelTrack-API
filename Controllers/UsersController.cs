@@ -2,6 +2,8 @@ using TravelTrack_API.Services;
 using TravelTrack_API.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Cors;
+using http = System.Web.Http;
+using System.Net;
 
 namespace Users.Controllers;
 
@@ -30,9 +32,10 @@ public class UsersController : ControllerBase
     /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(UserDto[]), StatusCodes.Status200OK)]
-    public ActionResult<List<UserDto>> GetAll() =>
-        //Ok(_userService.GetAll()); // 200
-        Ok(UserServiceTEMP.GetAll()); // 200
+    public ActionResult<List<UserDto>> GetAll()
+    { 
+        return new OkObjectResult(_userService.GetAll()); // 200
+    }
 
     /// <summary>
     /// Returns a user when given an existing username
@@ -42,13 +45,14 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public ActionResult<UserDto> Get(string username)
     {
-        //var user = _userService.Get(username);
-        var user = UserServiceTEMP.Get(username);
-
-        if (user is null)
-            return NotFound(); // 404
-
-        return Ok(user); // 200
+        try
+        {
+            return new OkObjectResult(_userService.Get(username)); // 200
+        }
+        catch (http.HttpResponseException e)
+        {
+            return new NotFoundObjectResult(e.Response); // 404
+        }
     }
 
     /// <summary>
@@ -59,13 +63,19 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public IActionResult Create(UserDto user)
     {
-        if (user is null)
-            return BadRequest(); // 400
-
-        //_userService.Add(user);
-        UserServiceTEMP.Add(user);
-
-        return CreatedAtAction(nameof(Create), "Users", new { username = user.Username }, user); // 201
+        try
+        {
+            var addedUser = _userService.Add(user);
+            return new CreatedAtActionResult(nameof(Create), "Users", new { username = addedUser.Username }, addedUser); // 201
+        }
+        catch (http.HttpResponseException e)
+        {
+            if (e.Response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return new NotFoundObjectResult(e.Response); // 404
+            }
+            return new BadRequestObjectResult(e.Response); // 400
+        }
     }
 
     /// <summary>
@@ -77,19 +87,18 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public IActionResult Update(string username, UserDto user)
     {
-        if (username != user.Username)
-            return BadRequest(); // 400
-
-        //var existingUser = _userService.Get(user.Username);
-        var existingUser = UserServiceTEMP.Get(user.Username);
-
-        if (existingUser is null)
-            return NotFound(); // 404
-
-        //_userService.Update(user);
-        UserServiceTEMP.Update(user);
-
-        return Ok(user); // 200
+        try
+        {
+            return new OkObjectResult(_userService.Update(username, user));
+        }
+        catch (http.HttpResponseException e)
+        {
+            if (e.Response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return new NotFoundObjectResult(e.Response); // 404
+            }
+            return new BadRequestObjectResult(e.Response); // 400
+        }
     }
 
     /// <summary>
@@ -101,15 +110,18 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public IActionResult Delete(string username)
     {
-        //var user = _userService.Get(username);
-        var user = UserServiceTEMP.Get(username);
-
-        if (user is null)
-            return NotFound(); // 404
-
-        //_userService.Delete(username);
-        UserServiceTEMP.Delete(username);
-
-        return NoContent(); // 204
+        try
+        {
+            _userService.Delete(username);
+            return new NoContentResult(); // 204
+        }
+        catch (http.HttpResponseException e)
+        {
+            if (e.Response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return new NotFoundObjectResult(e.Response); // 404
+            }
+            return new BadRequestObjectResult(e.Response); // 400
+        }
     }
 }

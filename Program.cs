@@ -43,6 +43,7 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services
     .AddDbContext<TravelTrackContext>(dbContextOptions => dbContextOptions.UseSqlServer("Server=localhost;Database=TravelTrackDB;Trusted_Connection=True;"));
+builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddScoped<ITripService, TripService>();
 builder.Services.AddScoped<IUserService, UserService>();

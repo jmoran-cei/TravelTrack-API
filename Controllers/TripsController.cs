@@ -2,6 +2,8 @@ using TravelTrack_API.Services;
 using TravelTrack_API.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Cors;
+using http = System.Web.Http;
+using System.Net;
 
 namespace Trips.Controllers;
 
@@ -30,9 +32,10 @@ public class TripsController : ControllerBase
     /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(TripDto[]), StatusCodes.Status200OK)]
-    public ActionResult<List<TripDto>> GetAll() =>
-        Ok(_tripService.GetAll()); // 200
-        //Ok(TripServiceTEMP.GetAll()); // 200
+    public ActionResult<List<TripDto>> GetAll()
+    {
+        return new OkObjectResult(_tripService.GetAll()); // 200
+    }
 
     /// <summary>
     /// Returns a trip when given a existing trip Id
@@ -42,13 +45,14 @@ public class TripsController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public ActionResult<TripDto> Get(long id)
     {
-        //var trip = _tripService.Get(id);
-        var trip = TripServiceTEMP.Get(id);
-
-        if (trip is null)
-            return NotFound(); // 404
-
-        return Ok(trip); // 200
+        try
+        {
+            return new OkObjectResult(_tripService.Get(id)); // 200
+        }
+        catch (http.HttpResponseException e)
+        {
+            return new NotFoundObjectResult(e.Response); // 404
+        }
     }
 
     /// <summary>
@@ -59,13 +63,19 @@ public class TripsController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public IActionResult Create(TripDto trip)
     {
-        if (trip is null)
-            return BadRequest(); // 400
-
-        //_tripService.Add(trip);
-        TripServiceTEMP.Add(trip);
-
-        return CreatedAtAction(nameof(Create), "Trips", new { id = trip.Id }, trip); // 201
+        try
+        {
+            var addedTrip = _tripService.Add(trip);
+            return new CreatedAtActionResult(nameof(Create), "Trips", new { id = trip.Id }, trip); // 201
+        }
+        catch (http.HttpResponseException e)
+        {
+            if (e.Response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return new NotFoundObjectResult(e.Response); // 404
+            }
+            return new BadRequestObjectResult(e.Response); // 400
+        }
     }
 
     /// <summary>
@@ -77,19 +87,18 @@ public class TripsController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public IActionResult Update(long id, TripDto trip)
     {
-        if (id != trip.Id)
-            return BadRequest(); // 400
-
-        //var existingTrip = _tripService.Get(trip.Id);
-        var existingTrip = TripServiceTEMP.Get(trip.Id);
-
-        if (existingTrip is null)
-            return NotFound(); // 404
-
-        //_tripService.Update(trip);
-        TripServiceTEMP.Update(trip);
-
-        return Ok(trip); // 200
+        try
+        {
+            return new OkObjectResult(_tripService.Update(id, trip));
+        }
+        catch (http.HttpResponseException e)
+        {
+            if (e.Response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return new NotFoundObjectResult(e.Response); // 404
+            }
+            return new BadRequestObjectResult(e.Response); // 400
+        }
     }
 
     /// <summary>
@@ -101,15 +110,18 @@ public class TripsController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public IActionResult Delete(long id)
     {
-        //var trip = _tripService.Get(id)!;
-        var trip = TripServiceTEMP.Get(id)!;
-
-        if (trip is null)
-            return NotFound(); // 404
-
-        //_tripService.Delete(id);
-        TripServiceTEMP.Delete(id);
-
-        return NoContent(); // 204
+        try
+        {
+            _tripService.Delete(id);
+            return new NoContentResult(); // 204
+        }
+        catch (http.HttpResponseException e)
+        {
+            if (e.Response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return new NotFoundObjectResult(e.Response); // 404
+            }
+            return new BadRequestObjectResult(e.Response); // 400
+        }
     }
 }

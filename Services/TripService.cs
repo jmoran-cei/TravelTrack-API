@@ -1,121 +1,335 @@
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using System.Net;
+using System.Web.Http;
+using TravelTrack_API.DbContexts;
+using TravelTrack_API.Domain;
 using TravelTrack_API.DTO;
 
 namespace TravelTrack_API.Services;
 
-public class TripService: ITripService
+public class TripService : ITripService
 {
-    List<TripDto> Trips { get; }
-    public TripService()
+    private readonly TravelTrackContext _ctx;
+    private readonly IMapper _mapper;
+    public TripService(TravelTrackContext ctx, IMapper mapper)
     {
-        Trips = new List<TripDto>
-        {
-            new TripDto
-            {
-                Id = 1,
-                Title = "Brothers' Anguila Trip",
-                Details = "Oremlay ipsumyay olorday itsay ametyay, onsectetuercay adipiscingyay elityay. Edsay itaevay eolay inyay iamday empersay orttitorpay. Ullamnay idyay augueyay. Aecenasmay atyay acuslay isquay islnay auctoryay imperdietyay. Integeryay incidunttay acinialay elitvay. Uspendissesay aretraphay. Uisday ariusvay. Ellentesquepay abitanthay orbimay istiquetray enectussay etyay etusnay etyay alesuadamay amesfay acyay urpistay egestasyay.",
-                StartDate = new DateTime(2022, 3, 15),
-                EndDate = new DateTime(2022, 3, 20),
-                Destinations = new List<DestinationDto>
-                {
-                    new DestinationDto { Id = "ChIJw4OtEaZjDowRZCw_jCcczqI", City = "Zemi Beach", Region = "West End", Country = "Anguilla" }
-                },
-                Members = new List<TripUserDto>
-                {
-                    new TripUserDto { Username = "jmoran@ceiamerica.com", FirstName = "Jonathan", LastName = "Moran" },
-                    new TripUserDto { Username = "dummyuser@dummy.dum", FirstName = "Dummy", LastName = "User" },
-                    new TripUserDto { Username = "fakeyfake@fakey.fake", FirstName = "Fake", LastName = "User" },
-                },
-                ToDo = new List<ToDoDto>
-                {
-                    new ToDoDto { Id = 0, Task = "pack clothes", Complete = false },
-                    new ToDoDto { Id = 1, Task = "get snacks", Complete = true },
-                    new ToDoDto { Id = 2, Task = "finish booking resort", Complete = true },
-                    new ToDoDto { Id = 3, Task = "buy more toothpaste", Complete = false },
-                },
-                ImgURL = "assets/images/trips/anguila1.jpg"
-            },
-            new TripDto
-            {
-                Id = 2,
-                Title = "Myrtle Beach and Charleston Family Vacay 2022",
-                Details = "Oremlay ipsumyay olorday itsay ametyay, onsectetuercay adipiscingyay elityay. Edsay itaevay eolay inyay iamday empersay orttitorpay. Ullamnay idyay augueyay. Aecenasmay atyay acuslay isquay islnay auctoryay imperdietyay. Integeryay incidunttay acinialay elitvay. Uspendissesay aretraphay. Uisday ariusvay. Ellentesquepay abitanthay orbimay istiquetray enectussay etyay etusnay etyay alesuadamay amesfay acyay urpistay egestasyay.",
-                StartDate = new DateTime(2022, 5, 27),
-                EndDate = new DateTime(2022, 6, 5),
-                Destinations = new List<DestinationDto>
-                {
-                    new DestinationDto { Id = "ChIJASFVO5VoAIkRGJbQtRWxD7w", City = "Myrtle Beach", Region = "South Carolina", Country = "United States" },
-                    new DestinationDto { Id = "ChIJdySo3EJ6_ogRa-zhruD3-jU", City = "Charleston", Region = "South Carolina", Country = "United States" },
-                },
-                Members = new List<TripUserDto>
-                {
-                    new TripUserDto { Username = "jmoran@ceiamerica.com", FirstName = "Jonathan", LastName = "Moran" },
-                    new TripUserDto { Username = "dummyuser@dummy.dum", FirstName = "Dummy", LastName = "User" },
-                    new TripUserDto { Username = "fakeyfake@fakey.fake", FirstName = "Fake", LastName = "User" },
-                },
-                ToDo = new List<ToDoDto>
-                {
-                    new ToDoDto { Id = 0, Task = "buy new swim trunks", Complete = true },
-                    new ToDoDto { Id = 1, Task = "pack beach towels", Complete = true },
-                    new ToDoDto { Id = 2, Task = "get snacks", Complete = false },
-                    new ToDoDto { Id = 3, Task = "remember to bring gas rewards card", Complete = false },
-                    new ToDoDto { Id = 4, Task = "purchase flights", Complete = false },
-                },
-                ImgURL = "assets/images/trips/myrtlebeach1.jpg"
-            },
-            new TripDto
-            {
-                Id = 3,
-                Title = "Another Test Trip",
-                Details = "",
-                StartDate = new DateTime(2024, 7, 19),
-                EndDate = new DateTime(2024, 8, 1),
-                Destinations = new List<DestinationDto>
-                {
-                    new DestinationDto { Id = "ChIJASFVO5VoAIkRGJbQtRWxD7w", City = "Myrtle Beach", Region = "South Carolina", Country = "United States" },
-                    new DestinationDto { Id = "ChIJdySo3EJ6_ogRa-zhruD3-jU", City = "Charleston", Region = "South Carolina", Country = "United States" },
-                },
-                Members = new List<TripUserDto>
-                {
-                    new TripUserDto { Username = "jmoran@ceiamerica.com", FirstName = "Jonathan", LastName = "Moran" },
-                    new TripUserDto { Username = "dummyuser@dummy.dum", FirstName = "Dummy", LastName = "User" },
-                    new TripUserDto { Username = "fakeyfake@fakey.fake", FirstName = "Fake", LastName = "User" },
-                },
-                ToDo = new List<ToDoDto>
-                {
-                    new ToDoDto { Id = 0, Task = "buy new swim trunks", Complete = true },
-                    new ToDoDto { Id = 1, Task = "pack beach towels", Complete = true },
-                    new ToDoDto { Id = 2, Task = "get snacks", Complete = false },
-                },
-                ImgURL = "assets/images/trips/myrtlebeach1.jpg"
-            }
-        };
+        _ctx = ctx;
+        _mapper = mapper;
     }
 
-    public List<TripDto> GetAll() => Trips!; 
-    public TripDto Get(long id) => Trips?.FirstOrDefault(t => t.Id == id)!;
+    public List<TripDto> GetAll()
+    {
+        List<Trip> trips = _ctx.Trips
+            .Include("Destinations.Destination")
+            .Include("Members.User")
+            .Include("ToDo")
+            .ToList();
+
+        List<TripDto> tripDTOs = _mapper.Map<List<TripDto>>(trips);
+        return tripDTOs;
+    }
+    public TripDto Get(long id)
+    {
+        var trip = _ctx.Trips
+            .Include("Destinations.Destination")
+            .Include("Members.User")
+            .Include("ToDo")
+            .FirstOrDefault(t => t.Id == id);
+
+        if (trip is null)
+        {
+            throw new HttpResponseException( // 404
+                ResponseMessage(
+                    HttpStatusCode.NotFound,
+                    $"No Trip with Id = {id}",
+                    "Trip Id Not Found"
+                )
+            );
+        }
+
+        TripDto tripDTOs = _mapper.Map<TripDto>(trip);
+        return tripDTOs;
+    }
     public TripDto Add(TripDto trip)
     {
-        Trips.Add(trip);
+        TripNullCheck(trip);
+
+        Trip tripEntity = new()
+        {
+            Title = trip.Title,
+            StartDate = trip.StartDate,
+            EndDate = trip.EndDate,
+            Details = trip.Details,
+            ImgURL = trip.ImgURL,
+        };
+
+        foreach (DestinationDto destination in trip.Destinations)
+        {
+            var existingDestination = _ctx.Destinations.Find(destination.Id);
+
+            // if destination does not exist in DB yet, add it to the DB
+            if (existingDestination == null)
+            {
+                _ctx.Destinations.Add(new Destination
+                {
+                    Id = destination.Id,
+                    City = destination.City,
+                    Region = destination.Region,
+                    Country = destination.Country,
+                });
+            }
+
+            // add destination to trip
+            tripEntity.Destinations.Add(new TripDestination
+            {
+                TripId = trip.Id,
+                DestinationId = destination.Id,
+            });
+        }
+
+
+        foreach (TripUserDto member in trip.Members)
+        {
+            // User must exist (already fully validated by frontend to DB)
+            var existingUser = _ctx.Users.Find(member.Username);
+
+            if (existingUser is not null)
+            {
+                // add member to trip
+                tripEntity.Members.Add(new TripUser
+                {
+                    TripId = trip.Id,
+                    Username = existingUser.Username,
+                });
+            }
+            else
+            {
+                throw new HttpResponseException( // 400
+                    ResponseMessage(
+                        HttpStatusCode.BadRequest,
+                        $"No User with Username = {member.Username}",
+                        "Bad Request: Trip Member Does Not Exist"
+                    )
+                );
+            }
+        }
+
+        foreach (ToDoDto task in trip.ToDo)
+        {
+            tripEntity.ToDo.Add(new ToDo
+            {
+                Task = task.Task,
+                Complete = task.Complete,
+                TripId = trip.Id,
+            });
+        }
+
+        _ctx.Trips.Add(tripEntity);
+        _ctx.SaveChanges();
+
+        // EF auto updates autogenerated Ids as object properties,
+        // so --> update generated Ids for returned trip DTO object
+        trip.Id = tripEntity.Id;
+        if (trip.ToDo is not null && trip.ToDo.Count > 0)
+        {
+            var index = 0;
+            foreach (ToDo task in tripEntity.ToDo)
+            {
+                trip.ToDo[index].Id = task.Id;
+                index++;
+            }
+        }
+
         return trip;
     }
 
     public void Delete(long id)
     {
-        var trip = Get(id);
-        if (trip is null)
-            return;
+        var trip = _ctx.Trips
+            .Include("Destinations.Destination")
+            .Include("Members.User")
+            .Include("ToDo")
+            .FirstOrDefault(t => t.Id == id);
 
-        Trips!.Remove(trip);
+        if (trip is null)
+        {
+            throw new HttpResponseException( // 404
+                ResponseMessage(
+                    HttpStatusCode.NotFound,
+                    $"No Trip with Id = {id}",
+                    "Trip Id Not Found"
+                )
+            );
+        }
+
+        _ctx.Remove(trip);
+        _ctx.SaveChanges();
     }
 
-    public TripDto Update(TripDto trip)
+    public TripDto Update(long id, TripDto trip)
     {
-        var index = Trips!.FindIndex(t => t.Id == trip.Id);
-        if (index == -1)
-            return trip;
+        TripNullCheck(trip);
 
-        Trips[index] = trip;
+        if (id != trip.Id)
+        {
+            throw new HttpResponseException( // 400
+                ResponseMessage(
+                    HttpStatusCode.BadRequest,
+                    $"Id = {id} and provided Trip Id = {trip.Id} do not match",
+                    "Bad Request: Id Mismatch"
+                )
+            );
+        }
+
+        var existingTrip = _ctx.Trips
+            .Include("Destinations.Destination")
+            .Include("Members.User")
+            .Include("ToDo")
+            .FirstOrDefault(t => t.Id == id);
+
+        if (existingTrip is null)
+        {
+            throw new HttpResponseException( // 404
+                ResponseMessage(
+                    HttpStatusCode.NotFound,
+                    $"No Trip with Id = {id}",
+                    "Trip Id Not Found"
+                )
+            );
+        }
+
+        existingTrip.Title = trip.Title;
+        existingTrip.StartDate = trip.StartDate;
+        existingTrip.EndDate = trip.EndDate;
+        existingTrip.Details = trip.Details;
+        existingTrip.ImgURL = trip.ImgURL;
+
+        _ctx.TripDestinations.RemoveRange(existingTrip.Destinations);
+        _ctx.TripUsers.RemoveRange(existingTrip.Members);
+        _ctx.ToDo.RemoveRange(existingTrip.ToDo);
+
+        foreach (DestinationDto destination in trip.Destinations)
+        {
+            var existingDestination = _ctx.Destinations.Find(destination.Id);
+
+            // if destination does not exist in DB yet, add it to the DB
+            if (existingDestination == null)
+            {
+                _ctx.Destinations.Add(new Destination
+                {
+                    Id = destination.Id,
+                    City = destination.City,
+                    Region = destination.Region,
+                    Country = destination.Country,
+                });
+            }
+
+            // add destination to trip
+            existingTrip.Destinations.Add(new TripDestination
+            {
+                TripId = trip.Id,
+                DestinationId = destination.Id,
+            });
+        }
+
+
+        foreach (TripUserDto member in trip.Members)
+        {
+            // User must exist (already fully validated by frontend to DB)
+            var existingUser = _ctx.Users.Find(member.Username);
+
+            if (existingUser is not null)
+            {
+                // add member to trip
+                existingTrip.Members.Add(new TripUser
+                {
+                    TripId = trip.Id,
+                    Username = existingUser.Username,
+                });
+            }
+            else
+            {
+                throw new HttpResponseException( //400
+                    ResponseMessage(
+                        HttpStatusCode.BadRequest,
+                        $"No User with Username = {member.Username}",
+                        "Bad Request: Trip Member Does Not Exist"
+                    )
+                );
+            }
+        }
+
+        
+        foreach (ToDoDto task in trip.ToDo)
+        {
+            existingTrip.ToDo.Add(new ToDo
+            {
+                Task = task.Task,
+                Complete = task.Complete,
+                TripId = trip.Id,
+            });
+        }
+
+        _ctx.SaveChanges();
+
+        // EF auto updates autogenerated Ids as object properties,
+        // so --> update generated Ids for returned trip DTO object
+        if (trip.ToDo is not null && trip.ToDo.Count > 0)
+        {
+            var index = 0;
+            foreach (ToDo task in existingTrip.ToDo)
+            {
+                trip.ToDo[index].Id = task.Id;
+                index++;
+            }
+        }
+
         return trip;
+    }
+
+
+
+    private void TripNullCheck(TripDto trip)
+    {
+        if (trip is null)
+        {
+            throw new HttpResponseException( //400
+                ResponseMessage(
+                    HttpStatusCode.BadRequest,
+                    "Trip cannot be null",
+                    "Bad Request: Null Trip"
+                )
+            );
+        }
+        if (trip.Destinations is null || trip.Destinations.Count < 1)
+        {
+            throw new HttpResponseException( //400
+                ResponseMessage(
+                    HttpStatusCode.BadRequest,
+                    "Trip Destinations cannot be null",
+                    "Bad Request: Null Trip.Destinations"
+                )
+            );
+        }
+        if (trip.Members is null || trip.Destinations.Count < 1)
+        {
+            throw new HttpResponseException( //400
+                ResponseMessage(
+                    HttpStatusCode.BadRequest,
+                    "Trip Members cannot be null",
+                    "Bad Request: Null Trip.Members"
+                )
+            );
+        }
+    }
+
+    private HttpResponseMessage ResponseMessage(HttpStatusCode statusCode, string content, string reasonPhrase)
+    {
+        return new HttpResponseMessage(statusCode)
+        {
+            Content = new ResponseContent.JsonContent(content),
+            ReasonPhrase = reasonPhrase
+        };
     }
 }
