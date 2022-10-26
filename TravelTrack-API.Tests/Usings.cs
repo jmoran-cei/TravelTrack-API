@@ -1,0 +1,9 @@
+﻿global using Microsoft.VisualStudio.TestTools.UnitTesting;
+global using AutoMapper;
+global using Microsoft.EntityFrameworkCore;
+global using TravelTrack_API.Services;
+global using TravelTrack_API.DbContexts;
+global using TravelTrack_API.DTO;
+global using System.Net;
+global using System.Web.Http;
+global using TravelTrack_API.Profiles;
