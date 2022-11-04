@@ -121,7 +121,10 @@ public class UserService : IUserService
             );
         }
 
-        existingUser = _mapper.Map<User>(user);
+        existingUser.FirstName = user.FirstName;
+        existingUser.LastName = user.LastName;
+        existingUser.Username = user.Username;
+        existingUser.Password = user.Password;
 
         _ctx.SaveChanges();
 

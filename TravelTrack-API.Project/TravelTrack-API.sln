@@ -5,6 +5,10 @@ VisualStudioVersion = 17.2.32526.322
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TravelTrack-API", "TravelTrack-API.csproj", "{0422874D-9A3F-46FD-97F4-CD535FA0765E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TravelTrack-API.Project", "TravelTrack-API.Project", "{73B90203-971B-4FB5-B376-A697E46FE985}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TravelTrack-API.Tests", "..\TravelTrack-API.Tests\TravelTrack-API.Tests.csproj", "{6EE83A55-6DA6-4E9A-9704-991474458AD4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,9 +19,16 @@ Global
 		{0422874D-9A3F-46FD-97F4-CD535FA0765E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0422874D-9A3F-46FD-97F4-CD535FA0765E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0422874D-9A3F-46FD-97F4-CD535FA0765E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6EE83A55-6DA6-4E9A-9704-991474458AD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EE83A55-6DA6-4E9A-9704-991474458AD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EE83A55-6DA6-4E9A-9704-991474458AD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6EE83A55-6DA6-4E9A-9704-991474458AD4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0422874D-9A3F-46FD-97F4-CD535FA0765E} = {73B90203-971B-4FB5-B376-A697E46FE985}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {29DBCAC7-DFE1-4A98-8B2D-16D8861A3CAD}
