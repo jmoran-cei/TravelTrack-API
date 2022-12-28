@@ -14,7 +14,7 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(
         policy =>
         {
-            policy.WithOrigins("http://localhost:4200");
+            policy.WithOrigins("*");
             policy.WithMethods("GET", "POST", "OPTIONS", "PUT", "DELETE");
             policy.WithHeaders("Content-Type", "X-Api-Key", "X-Api-Version");
         });
@@ -67,8 +67,15 @@ builder.Services.AddSwaggerGen(c =>
         $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
 });
 
+var dbConnectionString = "Server=localhost; Database = TravelTrackDB; Trusted_Connection = True;";
+
+if (builder.Environment.IsProduction())
+{
+    dbConnectionString = builder.Configuration.GetValue<string>("DBConnectionString");
+}
+
 builder.Services
-    .AddDbContext<TravelTrackContext>(dbContextOptions => dbContextOptions.UseSqlServer("Server=localhost;Database=TravelTrackDB;Trusted_Connection=True;"));
+    .AddDbContext<TravelTrackContext>(dbContextOptions => dbContextOptions.UseSqlServer(dbConnectionString));
 builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddScoped<ITripService, TripService>();
