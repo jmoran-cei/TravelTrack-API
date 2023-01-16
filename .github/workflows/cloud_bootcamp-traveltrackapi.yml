@@ -3,12 +3,6 @@
 
 name: Build and deploy ASP.Net Core app to Azure Web App - bootcamp-traveltrackapi
 
-env:
-  AZURE_WEBAPP_NAME: bootcamp-traveltrackapi
-  AZURE_WEBAPP_PACKAGE_PATH: TravelTrack-API.Project
-  PROJECT_FILE_PATH: ./TravelTrack-API.Project/TravelTrack-API.csproj  # using .csproj instead: .sln includes test folder so it lists a long list of unnecessary warnings after git action finishes
-  DOTNET_VERSION: 6.0.x
-
 on:
   push:
     branches:
@@ -20,24 +14,25 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
 
       - name: Set up .NET Core
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+          dotnet-version: '3.1'
+          include-prerelease: true
 
       - name: Build with dotnet
-        run: dotnet build ${{ env.PROJECT_FILE_PATH }} --configuration Release
+        run: dotnet build --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish ${{ env.PROJECT_FILE_PATH }} -c Release -o "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp"
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
         with:
           name: .net-app
-          path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp
+          path: ${{env.DOTNET_ROOT}}/myapp
 
   deploy:
     runs-on: windows-latest
@@ -56,7 +51,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          app-name: 'bootcamp-traveltrackapi'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_1 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_BFE519BC31B045E9AA1E641FB9392284 }}
           package: .
