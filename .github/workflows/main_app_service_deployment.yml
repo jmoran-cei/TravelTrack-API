@@ -5,7 +5,8 @@ name: Build and deploy ASP.Net Core app to Azure Web App - bootcamp-traveltracka
 
 env:
   AZURE_WEBAPP_NAME: bootcamp-traveltrackapi
-  AZURE_WEBAPP_PACKAGE_PATH: ./TravelTrack-API.Project
+  AZURE_WEBAPP_PACKAGE_PATH: TravelTrack-API.Project
+  PROJECT_FILE_PATH: ./TravelTrack-API.Project/TravelTrack-API.csproj  # using .csproj instead: .sln includes test folder so it lists a long list of unnecessary warnings after git action finishes
   DOTNET_VERSION: 6.0.x
 
 on:
@@ -27,16 +28,16 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Build with dotnet
-        run: dotnet build ./TravelTrack-API.Project/TravelTrack-API.sln --configuration Release
+        run: dotnet build ${{ env.PROJECT_FILE_PATH }} --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish ./TravelTrack-API.Project/TravelTrack-API.sln -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        run: dotnet publish ${{ env.PROJECT_FILE_PATH }} -c Release -o "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
         with:
           name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+          path: "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp"
 
   deploy:
     runs-on: windows-latest
@@ -47,15 +48,15 @@ jobs:
 
     steps:
       - name: Download artifact from build job
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: .net-app
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
+        uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E8649F0AF45B49018F3A29CCE6D68BF3 }}
-          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_1 }}
+          package: .
