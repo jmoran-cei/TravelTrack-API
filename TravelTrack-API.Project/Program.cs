@@ -16,7 +16,7 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(
         policy =>
         {
-            policy.WithOrigins("*");
+            policy.WithOrigins("https://localhost:7194", "http://localhost:4200", "https://bootcamp-traveltrack.azurewebsites.net");
             policy.WithMethods("GET", "POST", "OPTIONS", "PUT", "DELETE");
             policy.WithHeaders("Content-Type", "X-Api-Key", "X-Api-Version");
         });
