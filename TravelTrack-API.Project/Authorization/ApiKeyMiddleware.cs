@@ -7,10 +7,12 @@ namespace TravelTrack_API.Authorization
         private readonly RequestDelegate _next;
 
         private const string APIKEYNAME = "X-Api-Key";
+        private string _ApiKeyValue;
 
-        public ApiKeyMiddleware(RequestDelegate next)
+        public ApiKeyMiddleware(RequestDelegate next, string APIKeyValue)
         {
             _next = next;
+            _ApiKeyValue = APIKeyValue;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -23,8 +25,7 @@ namespace TravelTrack_API.Authorization
                 return;
             }
 
-            //string apiKey = "test"; // uncomment for simplicity when testing using Swagger
-            string apiKey = Secrets.ApiKey;
+            string apiKey = _ApiKeyValue;
 
             // prevents "timing attacks" vulnerability if ApiKey is encrypted (instead of using apiKey.Equals(extractedApiKey))
             var equals = CryptographicOperations.FixedTimeEquals(

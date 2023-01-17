@@ -8,6 +8,8 @@ using TravelTrack_API.DbContexts;
 using TravelTrack_API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+bool isProduction = builder.Environment.IsProduction();
+string ApiKeyValue = "dev"; // when prod: gets adjusted from Azure App Config value
 
 builder.Services.AddCors(options =>
 {
@@ -69,7 +71,7 @@ builder.Services.AddSwaggerGen(c =>
 
 var dbConnectionString = "Server=localhost; Database = TravelTrackDB; Trusted_Connection = True;";
 
-if (builder.Environment.IsProduction())
+if (isProduction)
 {
     dbConnectionString = builder.Configuration.GetValue<string>("DBConnectionString");
 }
@@ -115,7 +117,13 @@ app.UseCors();
 
 app.UseHttpsRedirection();
 
-app.UseMiddleware<ApiKeyMiddleware>();
+// for production: set API Key Value from config file (value stored in Azure App Config)
+if (isProduction)
+{
+    ApiKeyValue = builder.Configuration.GetValue<string>("ApiAccessKey");
+}
+
+app.UseMiddleware<ApiKeyMiddleware>(ApiKeyValue);
 
 app.UseAuthorization();
 
