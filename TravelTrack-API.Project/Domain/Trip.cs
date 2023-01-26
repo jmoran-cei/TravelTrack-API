@@ -21,6 +21,10 @@ public class Trip
     [Required]
     public List<TripUser> Members { get; set; }
     public List<ToDo> ToDo { get; set; } = new List<ToDo>();
+    public List<Photo> Photos { get; set; } = new List<Photo>();
+
+
+
     public Trip()
     {
         Destinations = new List<TripDestination>();
@@ -45,4 +49,17 @@ public class Destination
     public string Region { get; set; } = string.Empty;
     public string Country { get; set; } = string.Empty;
     public List<TripDestination> Trips { get; set; } = new List<TripDestination>();
+}
+
+public class Photo
+{
+    [Required]
+    public Guid Id { get; set; }
+    public string FileName { get; set; } = string.Empty;
+    public string FileType { get; set; } = string.Empty;
+    public string Path { get; set; } = string.Empty;
+    public string AddedByUser { get; set; } = string.Empty;
+    public string Alt { get; set; } = string.Empty;
+    public long TripId { get; set; }
+    public Trip Trip { get; set; } = null!;
 }

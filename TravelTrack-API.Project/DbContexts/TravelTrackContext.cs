@@ -11,6 +11,7 @@ public class TravelTrackContext : DbContext
     public DbSet<Destination> Destinations { get; set; } = null!;
     public DbSet<TripDestination> TripDestinations { get; set; } = null!;
     public DbSet<ToDo> ToDo { get; set; } = null!;
+    public DbSet<Photo> Photos { get; set; } = null!;
 
     public TravelTrackContext(DbContextOptions<TravelTrackContext> options) : base(options)
     {
@@ -53,6 +54,12 @@ public class TravelTrackContext : DbContext
             .WithMany(t => t.ToDo)
             .HasForeignKey(t => t.TripId);
 
+        bldr.Entity<Photo>()
+           .HasOne(t => t.Trip)
+           .WithMany(t => t.Photos)
+           .HasForeignKey(t => t.TripId);
+
+        // SEED DATA BELOW
         var trips = new Trip[]
         {
             new Trip
@@ -125,6 +132,28 @@ public class TravelTrackContext : DbContext
             new User { Username = "fakeuser@fakey.fake", Password = "P@ssw0rd", FirstName = "Fake", LastName = "User" }
         };
 
+        var photos = new Photo[]
+        {
+            new Photo {
+                Id = Guid.NewGuid(),
+                TripId = 1, 
+                FileName = "1-sample-trip-img.jpg", 
+                Path = "https://bootcampjmoranstorage.blob.core.windows.net/trip-photos/1-sample-trip-img.jpg", 
+                AddedByUser = "jmoran@ceiamerica.com", 
+                Alt = "1-sample-trip-img.jpg",
+                FileType = "image/jpg"
+            },
+            new Photo {
+                Id = Guid.NewGuid(),
+                TripId = 1,
+                FileName = "1-travel-track-readme-img.jpg",
+                Path = "https://bootcampjmoranstorage.blob.core.windows.net/trip-photos/1-travel-track-readme-img.jpg",
+                AddedByUser = "jmoran@ceiamerica.com",
+                Alt = "1-travel-track-readme-img.jpg",
+                FileType = "image/jpg"
+            }
+        };
+
         bldr.Entity<Trip>()
             .HasData(trips);
 
@@ -141,7 +170,10 @@ public class TravelTrackContext : DbContext
             .HasData(tripDestinations);
 
         bldr.Entity<ToDo>()
-            .HasData(toDo);
+            .HasData(toDo); 
+        
+        bldr.Entity<Photo>()
+            .HasData(photos);
 
         base.OnModelCreating(bldr);
     }
