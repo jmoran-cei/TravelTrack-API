@@ -122,7 +122,72 @@ public class TripsController : ControllerBase
             {
                 return new NotFoundObjectResult(e.Response); // 404
             }
-            return new BadRequestObjectResult(e.Response); // 400
+            if (e.Response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                return new BadRequestObjectResult(e.Response); // 400
+            }
+            return new ObjectResult(e.Response); // other (e.g. Azure blob throws error)
         }
     }
+
+    /// <summary>
+    /// Adds a photo to a trip and uploads the file to Azure blob storage
+    /// </summary>
+    [HttpPut("{id}/addphoto")]
+    [Consumes("multipart/form-data")]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public IActionResult AddPhoto([FromForm] PhotoDto photo, [FromRoute]long id)
+    {
+        try
+        {
+            IFormFile file = Request.Form.Files[0];
+            var updatedTrip = _tripService.AddPhotoToTrip(photo, file, id);
+            return new OkObjectResult(updatedTrip);
+        }
+        catch (http.HttpResponseException e)
+        {
+            if (e.Response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return new NotFoundObjectResult(e.Response); // 404
+            }
+            if (e.Response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                return new BadRequestObjectResult(e.Response); // 400
+            }
+            if (e.Response.StatusCode == HttpStatusCode.Conflict)
+            {
+                return new ConflictObjectResult(e.Response); // 409
+            }
+            return new ObjectResult(e.Response); // other (e.g. Azure blob throws error)
+        }
+    }
+
+    /// <summary>
+    /// Removes photos from a trip and deletes the file from Azure blob storage
+    /// </summary>
+    [HttpPut("{id}/removephotos")]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public IActionResult RemovePhotos(List<PhotoDto> photos, [FromRoute] long id)
+    {
+        try
+        {
+            var updatedTrip = _tripService.RemovePhotosFromTrip(photos, id);
+            return new OkObjectResult(updatedTrip);
+        }
+        catch (http.HttpResponseException e)
+        {
+            if (e.Response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return new NotFoundObjectResult(e.Response); // 404
+            }
+            if (e.Response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                return new BadRequestObjectResult(e.Response); // 400
+            }
+            return new ObjectResult(e.Response); // other (e.g. Azure blob throws error)
+        }
+    }
+
 }
