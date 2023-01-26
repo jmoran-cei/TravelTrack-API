@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using TravelTrack_API.Authorization;
 using TravelTrack_API.DbContexts;
 using TravelTrack_API.Services;
+using TravelTrack_API.Services.BlobManagement;
 
 var builder = WebApplication.CreateBuilder(args);
 bool isProduction = builder.Environment.IsProduction();
@@ -82,6 +83,7 @@ builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddScoped<ITripService, TripService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IBlobService, BlobService>();
 
 // NOTE: I'll actually apply a new version when/if I end up adding Trip Photos as a new Trip property ( not my highest priority.. need to get some experience testing soon )
 // Also, I was going to implement Uri versioning, but learned it is often more useful for new entity versioning rather than format versioning (which is more of my case)
