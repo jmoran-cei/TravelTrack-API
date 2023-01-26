@@ -10,7 +10,7 @@
   },
   "profiles": {
     "TravelTrack_API": {
-      "commandName": "Project",
+      "commandName": "Executable",
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
