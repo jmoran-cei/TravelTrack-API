@@ -351,8 +351,8 @@ public class TripService : ITripService
                 throw new HttpResponseException( // 409
                     ResponseMessage(
                         HttpStatusCode.Conflict,
-                        $"Photo FileName = {photo.FileName} already exists for this trip",
-                        "Duplicate Trip Photo FileName"
+                        $"Duplicate File: Photo FileName = {photo.FileName} already exists for this trip",
+                        $"'{photo.Alt}' already exists for this trip."
                     )
                 );
             }
