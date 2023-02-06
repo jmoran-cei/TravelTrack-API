@@ -19,13 +19,15 @@ namespace Users.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly IUserService _userService;
+    private readonly ILogger<UsersController> _logger;
 
     /// <summary>
     /// UsersController's constructor
     /// </summary>
-    public UsersController(IUserService userService)
+    public UsersController(IUserService userService, ILogger<UsersController> logger)
     {
         _userService = userService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -35,7 +37,17 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(UserDto[]), StatusCodes.Status200OK)]
     public ActionResult<List<UserDto>> GetAll()
     { 
-        return new OkObjectResult(_userService.GetAll()); // 200
+        try
+        {
+            return new OkObjectResult(_userService.GetAll()); // 200
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
     }
 
     /// <summary>
@@ -52,7 +64,21 @@ public class UsersController : ControllerBase
         }
         catch (http.HttpResponseException e)
         {
-            return new NotFoundObjectResult(e.Response); // 404
+            if (e.Response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return new NotFoundObjectResult(e.Response); // 404
+            }
+            // log to Application Insights
+            _logger.LogError(e, e.Response.ReasonPhrase);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
 
@@ -75,7 +101,21 @@ public class UsersController : ControllerBase
             {
                 return new NotFoundObjectResult(e.Response); // 404
             }
-            return new BadRequestObjectResult(e.Response); // 400
+            if (e.Response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                return new BadRequestObjectResult(e.Response); // 400
+            }
+            // log to Application Insights
+            _logger.LogError(e, e.Response.ReasonPhrase);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
 
@@ -98,7 +138,21 @@ public class UsersController : ControllerBase
             {
                 return new NotFoundObjectResult(e.Response); // 404
             }
-            return new BadRequestObjectResult(e.Response); // 400
+            if (e.Response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                return new BadRequestObjectResult(e.Response); // 400
+            }
+            // log to Application Insights
+            _logger.LogError(e, e.Response.ReasonPhrase);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
 
@@ -122,7 +176,21 @@ public class UsersController : ControllerBase
             {
                 return new NotFoundObjectResult(e.Response); // 404
             }
-            return new BadRequestObjectResult(e.Response); // 400
+            if (e.Response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                return new BadRequestObjectResult(e.Response); // 400
+            }
+            // log to Application Insights
+            _logger.LogError(e, e.Response.ReasonPhrase);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
 }

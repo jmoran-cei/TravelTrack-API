@@ -19,13 +19,15 @@ namespace Trips.Controllers;
 public class TripsController : ControllerBase
 {
     private readonly ITripService _tripService;
+    private readonly ILogger<TripsController> _logger;
 
     /// <summary>
     /// TripsController's constructor
     /// </summary>
-    public TripsController(ITripService tripService)
+    public TripsController(ITripService tripService, ILogger<TripsController> logger)
     {
         _tripService = tripService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -35,7 +37,17 @@ public class TripsController : ControllerBase
     [ProducesResponseType(typeof(TripDto[]), StatusCodes.Status200OK)]
     public ActionResult<List<TripDto>> GetAll()
     {
-        return new OkObjectResult(_tripService.GetAll()); // 200
+        try
+        {
+            return new OkObjectResult(_tripService.GetAll()); // 200
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
     }
 
     /// <summary>
@@ -52,7 +64,21 @@ public class TripsController : ControllerBase
         }
         catch (http.HttpResponseException e)
         {
-            return new NotFoundObjectResult(e.Response); // 404
+            if (e.Response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return new NotFoundObjectResult(e.Response); // 404
+            }
+            // log to Application Insights
+            _logger.LogError(e, e.Response.ReasonPhrase);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
 
@@ -75,7 +101,21 @@ public class TripsController : ControllerBase
             {
                 return new NotFoundObjectResult(e.Response); // 404
             }
-            return new BadRequestObjectResult(e.Response); // 400
+            if (e.Response.StatusCode != HttpStatusCode.BadRequest)
+            {
+                return new BadRequestObjectResult(e.Response); // 400
+            }
+            // log to Application Insights
+            _logger.LogError(e, e.Response.ToString());
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
 
@@ -98,7 +138,21 @@ public class TripsController : ControllerBase
             {
                 return new NotFoundObjectResult(e.Response); // 404
             }
-            return new BadRequestObjectResult(e.Response); // 400
+            if (e.Response.StatusCode != HttpStatusCode.BadRequest)
+            {
+                return new BadRequestObjectResult(e.Response); // 400
+            }
+            // log to Application Insights
+            _logger.LogError(e, e.Response.ToString());
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
 
@@ -126,7 +180,18 @@ public class TripsController : ControllerBase
             {
                 return new BadRequestObjectResult(e.Response); // 400
             }
-            return new ObjectResult(e.Response); // other (e.g. Azure blob throws error)
+            // log to Application Insights
+            _logger.LogError(e, e.Response.ToString());
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
 
@@ -159,7 +224,17 @@ public class TripsController : ControllerBase
             {
                 return new ConflictObjectResult(e.Response); // 409
             }
-            return new ObjectResult(e.Response); // other (e.g. Azure blob throws error)
+            // log to Application Insights
+            _logger.LogError(e, e.Response.ToString());
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
 
@@ -186,7 +261,17 @@ public class TripsController : ControllerBase
             {
                 return new BadRequestObjectResult(e.Response); // 400
             }
-            return new ObjectResult(e.Response); // other (e.g. Azure blob throws error)
+            // log to Application Insights
+            _logger.LogError(e, e.Response.ToString());
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
 
