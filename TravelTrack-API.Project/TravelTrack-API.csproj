@@ -11,6 +11,8 @@
       Supress specific XML Documentation warning that generated 50+ times for types and members throughout models, etc.
      -->
     <NoWarn>1591</NoWarn>
+    <UserSecretsId>a6711fd9-5e28-4361-b079-1184af4686b0</UserSecretsId>
+    <ApplicationInsightsResourceId>/subscriptions/6ffa94d1-182a-4a3a-af1f-7744f649e621/resourceGroups/rg-bootcamp-jmoran/providers/microsoft.insights/components/bootcamp-traveltrackapi</ApplicationInsightsResourceId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -20,6 +22,7 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.14.1" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.15.0" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.9" />
     <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.0.0" />
