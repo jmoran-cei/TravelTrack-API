@@ -10,7 +10,8 @@ using TravelTrack_API.Services.BlobManagement;
 
 var builder = WebApplication.CreateBuilder(args);
 bool isProduction = builder.Environment.IsProduction();
-string ApiKeyValue = "dev"; // when prod: gets adjusted from Azure App Config value
+var dbConnectionString = "Server=localhost; Database=TravelTrackDB; Trusted_Connection=True;"; // dev
+string ApiKeyValue = "dev"; // dev
 
 builder.Services.AddCors(options =>
 {
@@ -70,11 +71,10 @@ builder.Services.AddSwaggerGen(c =>
         $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
 });
 
-var dbConnectionString = "Server=localhost; Database = TravelTrackDB; Trusted_Connection = True;";
-
 if (isProduction)
 {
-    dbConnectionString = builder.Configuration.GetValue<string>("DBConnectionString");
+    dbConnectionString = builder.Configuration.GetConnectionString("DBConnectionString");
+    ApiKeyValue = builder.Configuration.GetValue<string>("ApiAccessKey");
 }
 
 builder.Services
@@ -85,16 +85,11 @@ builder.Services.AddScoped<ITripService, TripService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBlobService, BlobService>();
 
-// NOTE: I'll actually apply a new version when/if I end up adding Trip Photos as a new Trip property ( not my highest priority.. need to get some experience testing soon )
-// Also, I was going to implement Uri versioning, but learned it is often more useful for new entity versioning rather than format versioning (which is more of my case)
 builder.Services.AddApiVersioning(options =>
 {
     options.DefaultApiVersion = new ApiVersion(1, 0);
     options.AssumeDefaultVersionWhenUnspecified = true;
     options.ReportApiVersions = true; // "api-supported-versions: 1.0"
-
-    // QUESTION: Would it be better practice to use ApiVersion.Combine() and also add QueryStringApiversionReader (or even media type) as well?
-    // is it seen as redundant? or is it something that is nice to have because it allows for different ways of version specification? I assume the latter but am unsure.
     options.ApiVersionReader = new HeaderApiVersionReader("X-Api-Version");
 });
 
@@ -119,12 +114,6 @@ if (app.Environment.IsDevelopment())
 app.UseCors();
 
 app.UseHttpsRedirection();
-
-// for production: set API Key Value from config file (value stored in Azure App Config)
-if (isProduction)
-{
-    ApiKeyValue = builder.Configuration.GetValue<string>("ApiAccessKey");
-}
 
 app.UseMiddleware<ApiKeyMiddleware>(ApiKeyValue);
 
