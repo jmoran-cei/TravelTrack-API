@@ -10,7 +10,7 @@ using TravelTrack_API.Services.BlobManagement;
 
 var builder = WebApplication.CreateBuilder(args);
 bool isProduction = builder.Environment.IsProduction();
-var dbConnectionString = "Server=localhost; Database=TravelTrackDB; Trusted_Connection=True;"; // dev
+string dbConnectionString = "Server=localhost; Database=TravelTrackDB; Trusted_Connection=True;"; // dev
 string ApiKeyValue = "dev"; // dev
 
 builder.Services.AddCors(options =>
