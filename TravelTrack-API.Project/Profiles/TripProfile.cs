@@ -11,6 +11,7 @@ namespace TravelTrack_API.Profiles
             CreateMap<Destination, DestinationDto>();
             CreateMap<User, TripUserDto>();
             CreateMap<ToDo, ToDoDto>();
+            CreateMap<Photo, PhotoDto>().ReverseMap();
 
             CreateMap<Trip, TripDto>()
                 // Destinations
@@ -21,7 +22,10 @@ namespace TravelTrack_API.Profiles
                         opt => opt.MapFrom(t => t.Members.Select(td => td.User).ToList()))
                 // ToDo
                 .ForMember(dto => dto.ToDo,
-                        opt => opt.MapFrom(t => t.ToDo.ToList()));
+                        opt => opt.MapFrom(t => t.ToDo.ToList()))
+                // Photos
+                .ForMember(dto => dto.Photos,
+                        opt => opt.MapFrom(t => t.Photos.ToList()));
         }
     }
 }

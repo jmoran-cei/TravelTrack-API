@@ -10,5 +10,7 @@ namespace TravelTrack_API.Services
         TripDto Add(TripDto trip);
         TripDto Update(long id, TripDto trip);
         void Delete(long id);
+        TripDto AddPhotoToTrip(PhotoDto photo, IFormFile file, long tripId);
+        TripDto RemovePhotosFromTrip(List<PhotoDto> photosToRemove, long tripId);
     }
 }

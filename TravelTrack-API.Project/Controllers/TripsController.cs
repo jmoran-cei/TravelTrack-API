@@ -19,13 +19,15 @@ namespace Trips.Controllers;
 public class TripsController : ControllerBase
 {
     private readonly ITripService _tripService;
+    private readonly ILogger<TripsController> _logger;
 
     /// <summary>
     /// TripsController's constructor
     /// </summary>
-    public TripsController(ITripService tripService)
+    public TripsController(ITripService tripService, ILogger<TripsController> logger)
     {
         _tripService = tripService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -35,7 +37,17 @@ public class TripsController : ControllerBase
     [ProducesResponseType(typeof(TripDto[]), StatusCodes.Status200OK)]
     public ActionResult<List<TripDto>> GetAll()
     {
-        return new OkObjectResult(_tripService.GetAll()); // 200
+        try
+        {
+            return new OkObjectResult(_tripService.GetAll()); // 200
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
     }
 
     /// <summary>
@@ -52,7 +64,21 @@ public class TripsController : ControllerBase
         }
         catch (http.HttpResponseException e)
         {
-            return new NotFoundObjectResult(e.Response); // 404
+            if (e.Response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return new NotFoundObjectResult(e.Response); // 404
+            }
+            // log to Application Insights
+            _logger.LogError(e, e.Response.ReasonPhrase);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
 
@@ -75,7 +101,21 @@ public class TripsController : ControllerBase
             {
                 return new NotFoundObjectResult(e.Response); // 404
             }
-            return new BadRequestObjectResult(e.Response); // 400
+            if (e.Response.StatusCode != HttpStatusCode.BadRequest)
+            {
+                return new BadRequestObjectResult(e.Response); // 400
+            }
+            // log to Application Insights
+            _logger.LogError(e, e.Response.ToString());
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
 
@@ -98,7 +138,21 @@ public class TripsController : ControllerBase
             {
                 return new NotFoundObjectResult(e.Response); // 404
             }
-            return new BadRequestObjectResult(e.Response); // 400
+            if (e.Response.StatusCode != HttpStatusCode.BadRequest)
+            {
+                return new BadRequestObjectResult(e.Response); // 400
+            }
+            // log to Application Insights
+            _logger.LogError(e, e.Response.ToString());
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
 
@@ -122,7 +176,103 @@ public class TripsController : ControllerBase
             {
                 return new NotFoundObjectResult(e.Response); // 404
             }
-            return new BadRequestObjectResult(e.Response); // 400
+            if (e.Response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                return new BadRequestObjectResult(e.Response); // 400
+            }
+            // log to Application Insights
+            _logger.LogError(e, e.Response.ToString());
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
+
+    /// <summary>
+    /// Adds a photo to a trip and uploads the file to Azure blob storage
+    /// </summary>
+    [HttpPut("{id}/addphoto")]
+    [Consumes("multipart/form-data")]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public IActionResult AddPhoto([FromForm] PhotoDto photo, [FromRoute]long id)
+    {
+        try
+        {
+            IFormFile file = Request.Form.Files[0];
+            var updatedTrip = _tripService.AddPhotoToTrip(photo, file, id);
+            return new OkObjectResult(updatedTrip);
+        }
+        catch (http.HttpResponseException e)
+        {
+            if (e.Response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return new NotFoundObjectResult(e.Response); // 404
+            }
+            if (e.Response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                return new BadRequestObjectResult(e.Response); // 400
+            }
+            if (e.Response.StatusCode == HttpStatusCode.Conflict)
+            {
+                return new ConflictObjectResult(e.Response); // 409
+            }
+            // log to Application Insights
+            _logger.LogError(e, e.Response.ToString());
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+    /// <summary>
+    /// Removes photos from a trip and deletes the file from Azure blob storage
+    /// </summary>
+    [HttpPut("{id}/removephotos")]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public IActionResult RemovePhotos(List<PhotoDto> photos, [FromRoute] long id)
+    {
+        try
+        {
+            var updatedTrip = _tripService.RemovePhotosFromTrip(photos, id);
+            return new OkObjectResult(updatedTrip);
+        }
+        catch (http.HttpResponseException e)
+        {
+            if (e.Response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return new NotFoundObjectResult(e.Response); // 404
+            }
+            if (e.Response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                return new BadRequestObjectResult(e.Response); // 400
+            }
+            // log to Application Insights
+            _logger.LogError(e, e.Response.ToString());
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+    }
+
 }
