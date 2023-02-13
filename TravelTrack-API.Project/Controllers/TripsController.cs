@@ -15,7 +15,6 @@ namespace Trips.Controllers;
 [Consumes("application/json")]
 [Route("api/[controller]")]
 [EnableCors()]
-[ApiVersion("1.0")]
 public class TripsController : ControllerBase
 {
     private readonly ITripService _tripService;
@@ -33,6 +32,7 @@ public class TripsController : ControllerBase
     /// <summary>
     /// Returns all trips
     /// </summary>
+    [ApiVersion("1.0")]
     [HttpGet]
     [ProducesResponseType(typeof(TripDto[]), StatusCodes.Status200OK)]
     public ActionResult<List<TripDto>> GetAll()
@@ -50,9 +50,30 @@ public class TripsController : ControllerBase
         }
     }
 
+    [ApiVersion("2.0")]
+    [HttpGet]
+    [ProducesResponseType(typeof(TripDto[]), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<TripDto>>> GetAllAsync()
+    {
+        try
+        {
+            return new OkObjectResult(await _tripService.GetAllAsync()); // 200
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+
+
     /// <summary>
     /// Returns a trip when given a existing trip Id
     /// </summary>
+    [ApiVersion("1.0")]
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(TripDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -82,9 +103,42 @@ public class TripsController : ControllerBase
         }
     }
 
+    [ApiVersion("2.0")]
+    [HttpGet("{id}")]
+    [ProducesResponseType(typeof(TripDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<TripDto>> GetAsync(long id)
+    {
+        try
+        {
+            return new OkObjectResult(await _tripService.GetAsync(id)); // 200
+        }
+        catch (http.HttpResponseException e)
+        {
+            if (e.Response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return new NotFoundObjectResult(e.Response); // 404
+            }
+            // log to Application Insights
+            _logger.LogError(e, e.Response.ReasonPhrase);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+
+
     /// <summary>
     /// Creates a new trip
     /// </summary>
+    [ApiVersion("1.0")]
     [HttpPost]
     [ProducesResponseType(typeof(TripDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -101,7 +155,7 @@ public class TripsController : ControllerBase
             {
                 return new NotFoundObjectResult(e.Response); // 404
             }
-            if (e.Response.StatusCode != HttpStatusCode.BadRequest)
+            if (e.Response.StatusCode == HttpStatusCode.BadRequest)
             {
                 return new BadRequestObjectResult(e.Response); // 400
             }
@@ -119,10 +173,48 @@ public class TripsController : ControllerBase
         }
     }
 
+    [ApiVersion("2.0")]
+    [HttpPost]
+    [ProducesResponseType(typeof(TripDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CreateAsync(TripDto trip)
+    {
+        try
+        {
+            var addedTrip = await _tripService.AddAsync(trip);
+            return new CreatedAtActionResult(nameof(Create), "Trips", new { id = trip.Id }, trip); // 201
+        }
+        catch (http.HttpResponseException e)
+        {
+            if (e.Response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return new NotFoundObjectResult(e.Response); // 404
+            }
+            if (e.Response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                return new BadRequestObjectResult(e.Response); // 400
+            }
+            // log to Application Insights
+            _logger.LogError(e, e.Response.ToString());
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+
+
     /// <summary>
     /// Updates a trip
     /// </summary>
     [HttpPut("{id}")]
+    [ApiVersion("1.0")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -138,7 +230,7 @@ public class TripsController : ControllerBase
             {
                 return new NotFoundObjectResult(e.Response); // 404
             }
-            if (e.Response.StatusCode != HttpStatusCode.BadRequest)
+            if (e.Response.StatusCode == HttpStatusCode.BadRequest)
             {
                 return new BadRequestObjectResult(e.Response); // 400
             }
@@ -156,9 +248,47 @@ public class TripsController : ControllerBase
         }
     }
 
+    [HttpPut("{id}")]
+    [ApiVersion("2.0")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateAsync(long id, TripDto trip)
+    {
+        try
+        {
+            return new OkObjectResult(await _tripService.UpdateAsync(id, trip));
+        }
+        catch (http.HttpResponseException e)
+        {
+            if (e.Response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return new NotFoundObjectResult(e.Response); // 404
+            }
+            if (e.Response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                return new BadRequestObjectResult(e.Response); // 400
+            }
+            // log to Application Insights
+            _logger.LogError(e, e.Response.ToString());
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+
+
     /// <summary>
     /// Deletes a trip
     /// </summary>
+    [ApiVersion("1.0")]
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -195,9 +325,49 @@ public class TripsController : ControllerBase
         }
     }
 
+    [ApiVersion("2.0")]
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteAsync(long id)
+    {
+        try
+        {
+            await _tripService.DeleteAsync(id);
+            return new NoContentResult(); // 204
+        }
+        catch (http.HttpResponseException e)
+        {
+            if (e.Response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return new NotFoundObjectResult(e.Response); // 404
+            }
+            if (e.Response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                return new BadRequestObjectResult(e.Response); // 400
+            }
+            // log to Application Insights
+            _logger.LogError(e, e.Response.ToString());
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+
+
     /// <summary>
     /// Adds a photo to a trip and uploads the file to Azure blob storage
     /// </summary>
+    [ApiVersion("1.0")]
     [HttpPut("{id}/addphoto")]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -238,9 +408,53 @@ public class TripsController : ControllerBase
         }
     }
 
+    [ApiVersion("2.0")]
+    [HttpPut("{id}/addphoto")]
+    [Consumes("multipart/form-data")]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> AddPhotoAsync([FromForm] PhotoDto photo, [FromRoute] long id)
+    {
+        try
+        {
+            IFormFile file = Request.Form.Files[0];
+            var updatedTrip = await _tripService.AddPhotoToTripAsync(photo, file, id);
+            return new OkObjectResult(updatedTrip);
+        }
+        catch (http.HttpResponseException e)
+        {
+            if (e.Response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return new NotFoundObjectResult(e.Response); // 404
+            }
+            if (e.Response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                return new BadRequestObjectResult(e.Response); // 400
+            }
+            if (e.Response.StatusCode == HttpStatusCode.Conflict)
+            {
+                return new ConflictObjectResult(e.Response); // 409
+            }
+            // log to Application Insights
+            _logger.LogError(e, e.Response.ToString());
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+
+
     /// <summary>
     /// Removes photos from a trip and deletes the file from Azure blob storage
     /// </summary>
+    [ApiVersion("1.0")]
     [HttpPut("{id}/removephotos")]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -249,6 +463,41 @@ public class TripsController : ControllerBase
         try
         {
             var updatedTrip = _tripService.RemovePhotosFromTrip(photos, id);
+            return new OkObjectResult(updatedTrip);
+        }
+        catch (http.HttpResponseException e)
+        {
+            if (e.Response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return new NotFoundObjectResult(e.Response); // 404
+            }
+            if (e.Response.StatusCode == HttpStatusCode.BadRequest)
+            {
+                return new BadRequestObjectResult(e.Response); // 400
+            }
+            // log to Application Insights
+            _logger.LogError(e, e.Response.ToString());
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+    [ApiVersion("2.0")]
+    [HttpPut("{id}/removephotos")]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RemovePhotosAsync(List<PhotoDto> photos, [FromRoute] long id)
+    {
+        try
+        {
+            var updatedTrip = await _tripService.RemovePhotosFromTripAsync(photos, id);
             return new OkObjectResult(updatedTrip);
         }
         catch (http.HttpResponseException e)
