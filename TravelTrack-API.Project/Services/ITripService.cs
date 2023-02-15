@@ -1,4 +1,5 @@
-﻿using TravelTrack_API.DTO;
+﻿using System.Net;
+using TravelTrack_API.DTO;
 
 namespace TravelTrack_API.Services
 {
@@ -18,5 +19,6 @@ namespace TravelTrack_API.Services
         Task<TripDto> AddPhotoToTripAsync(PhotoDto photo, IFormFile file, long tripId);
         TripDto RemovePhotosFromTrip(List<PhotoDto> photosToRemove, long tripId);
         Task<TripDto> RemovePhotosFromTripAsync(List<PhotoDto> photosToRemove, long tripId);
+        HttpResponseMessage ResponseMessage(HttpStatusCode statusCode, string content, string reasonPhrase);
     }
 }

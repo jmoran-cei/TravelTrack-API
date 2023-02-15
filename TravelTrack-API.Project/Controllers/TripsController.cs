@@ -376,9 +376,22 @@ public class TripsController : ControllerBase
     {
         try
         {
-            IFormFile file = Request.Form.Files[0];
-            var updatedTrip = _tripService.AddPhotoToTrip(photo, file, id);
-            return new OkObjectResult(updatedTrip);
+            if (Request.Form.Files.Count() > 0)
+            {
+                IFormFile file = Request.Form.Files[0];
+                var updatedTrip =_tripService.AddPhotoToTrip(photo, file, id);
+                return new OkObjectResult(updatedTrip);
+            }
+            else
+            {
+                throw new http.HttpResponseException( //400
+                    _tripService.ResponseMessage(
+                        HttpStatusCode.BadRequest,
+                        "Null File: Make sure to provide a file as form data",
+                        "Bad Request: Null File"
+                    )
+                );
+            }
         }
         catch (http.HttpResponseException e)
         {
@@ -417,9 +430,22 @@ public class TripsController : ControllerBase
     {
         try
         {
-            IFormFile file = Request.Form.Files[0];
-            var updatedTrip = await _tripService.AddPhotoToTripAsync(photo, file, id);
-            return new OkObjectResult(updatedTrip);
+            if (Request.Form.Files.Count() > 0)
+            {
+                IFormFile file = Request.Form.Files[0];
+                var updatedTrip = await _tripService.AddPhotoToTripAsync(photo, file, id);
+                return new OkObjectResult(updatedTrip);
+            }
+            else
+            {
+                throw new http.HttpResponseException( //400
+                    _tripService.ResponseMessage(
+                        HttpStatusCode.BadRequest,
+                        "Null File: Make sure to provide a file as form data",
+                        "Bad Request: Null File"
+                    )
+                );
+            }
         }
         catch (http.HttpResponseException e)
         {

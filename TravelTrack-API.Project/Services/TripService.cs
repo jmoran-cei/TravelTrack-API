@@ -599,6 +599,20 @@ public class TripService : ITripService
         // null check photo
         photoNullCheck(photo);
 
+        if (file is not null)
+        {
+            if (file.ContentType != "image/jpeg" && file.ContentType != "image/png")
+            {
+                throw new HttpResponseException( // 400
+                    ResponseMessage(
+                        HttpStatusCode.BadRequest,
+                        $"Invalid ContentType: File must be image/jpeg or image/png",
+                        "Bad Request: Invalid File Type"
+                    )
+                );
+            }
+        }
+
         // check that Trip Ids match
         if (photo.TripId != tripId)
         {
@@ -653,7 +667,7 @@ public class TripService : ITripService
         photoEntity.Id = Guid.NewGuid();
 
         // upload to blob storage and assign path
-        photoEntity.Path = uploadPhotoToStorage(file);
+        photoEntity.Path = _blobService.UploadPhotoToStorage(file);
 
         _ctx.Photos.Add(photoEntity);
         _ctx.SaveChanges();
@@ -667,6 +681,30 @@ public class TripService : ITripService
     {
         // null check photo
         photoNullCheck(photo);
+
+        if (file is not null)
+        {
+            if (file.ContentType != "image/jpeg" && file.ContentType != "image/png")
+            {
+                throw new HttpResponseException( // 400
+                    ResponseMessage(
+                        HttpStatusCode.BadRequest,
+                        $"Invalid ContentType: File must be image/jpeg or image/png",
+                        "Bad Request: Invalid File Type"
+                    )
+                );
+            }
+        }
+        else
+        {
+            throw new HttpResponseException( // 400
+                ResponseMessage(
+                    HttpStatusCode.BadRequest,
+                    $"Null File: There must be a file provided as form data.",
+                    "Bad Request: Null File"
+                )
+            );
+        }
 
         // check that Trip Ids match
         if (photo.TripId != tripId)
@@ -722,7 +760,7 @@ public class TripService : ITripService
         photoEntity.Id = Guid.NewGuid();
 
         // upload to blob storage and assign path
-        photoEntity.Path = await uploadPhotoToStorageAsync(file);
+        photoEntity.Path = await _blobService.UploadPhotoToStorageAsync(file);
 
         await _ctx.Photos.AddAsync(photoEntity);
         await _ctx.SaveChangesAsync();
@@ -869,27 +907,6 @@ public class TripService : ITripService
 
     // ------- private methods -------
 
-
-    private string uploadPhotoToStorage(IFormFile file)
-    {
-        using (MemoryStream ms = new MemoryStream())
-        {
-            file.CopyTo(ms);
-            ms.Seek(0, SeekOrigin.Begin);
-            return _blobService.Upload(ms, file.FileName, file.ContentType);
-        }
-    }
-
-    private async Task<string> uploadPhotoToStorageAsync(IFormFile file)
-    {
-        using (MemoryStream ms = new MemoryStream())
-        {
-            await file.CopyToAsync(ms);
-            ms.Seek(0, SeekOrigin.Begin);
-            return await _blobService.UploadAsync(ms, file.FileName, file.ContentType);
-        }
-    }
-
     private void photoNullCheck(PhotoDto photo)
     {
         if (photo is null)
@@ -938,7 +955,8 @@ public class TripService : ITripService
         }
     }
 
-    private HttpResponseMessage ResponseMessage(HttpStatusCode statusCode, string content, string reasonPhrase)
+    // ------- public http exception method -------
+    public HttpResponseMessage ResponseMessage(HttpStatusCode statusCode, string content, string reasonPhrase)
     {
         return new HttpResponseMessage(statusCode)
         {

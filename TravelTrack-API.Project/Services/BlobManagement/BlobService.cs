@@ -3,7 +3,7 @@ using Azure.Storage.Blobs.Models;
 
 namespace TravelTrack_API.Services.BlobManagement
 {
-    public class BlobService :IBlobService
+    public class BlobService : IBlobService
     {
         private readonly string _storageConnectionString;
 
@@ -54,6 +54,26 @@ namespace TravelTrack_API.Services.BlobManagement
         {
             var container = new BlobContainerClient(_storageConnectionString, "trip-photos");
             return await container.GetBlobClient(fileName).DeleteIfExistsAsync();
+        }
+
+        public string UploadPhotoToStorage(IFormFile file)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                file.CopyTo(ms);
+                ms.Seek(0, SeekOrigin.Begin);
+                return Upload(ms, file.FileName, file.ContentType);
+            }
+        }
+
+        public async Task<string> UploadPhotoToStorageAsync(IFormFile file)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                await file.CopyToAsync(ms);
+                ms.Seek(0, SeekOrigin.Begin);
+                return await UploadAsync(ms, file.FileName, file.ContentType);
+            }
         }
     }
 }
