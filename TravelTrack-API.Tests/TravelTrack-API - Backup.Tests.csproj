@@ -7,6 +7,8 @@
     <Nullable>enable</Nullable>
 
     <IsPackable>false</IsPackable>
+
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,6 +22,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TravelTrack-API.Project\TravelTrack-API.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="TestMethods\" />
   </ItemGroup>
 
 </Project>
