@@ -24,10 +24,26 @@
             return mockBlobService.Object;
         }
 
+        public static IBlobService GetBlobServiceUploadedBlobAsyncMock(FormFile mockedFile, string mockReturnedPhotoUrl)
+        {
+            var mockBlobService = new Mock<IBlobService>();
+            mockBlobService.Setup(b => b.UploadPhotoToStorageAsync(mockedFile)).ReturnsAsync(mockReturnedPhotoUrl);
+
+            return mockBlobService.Object;
+        }
+
         public static IBlobService GetBlobServiceDeleteBlobMock(bool mockReturnedBoolean)
         {
             var mockBlobService = new Mock<IBlobService>();
             mockBlobService.Setup(b => b.Delete(It.IsAny<string>())).Returns(mockReturnedBoolean);
+
+            return mockBlobService.Object;
+        }
+
+        public static IBlobService GetBlobServiceDeleteBlobAsyncMock(bool mockReturnedBoolean)
+        {
+            var mockBlobService = new Mock<IBlobService>();
+            mockBlobService.Setup(b => b.DeleteAsync(It.IsAny<string>())).ReturnsAsync(mockReturnedBoolean);
 
             return mockBlobService.Object;
         }
