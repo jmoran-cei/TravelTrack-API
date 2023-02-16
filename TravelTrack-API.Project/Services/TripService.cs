@@ -612,6 +612,16 @@ public class TripService : ITripService
                 );
             }
         }
+        else
+        {
+            throw new HttpResponseException( // 400
+                ResponseMessage(
+                    HttpStatusCode.BadRequest,
+                    $"Null File: There must be a file provided as form data.",
+                    "Bad Request: Null File"
+                )
+            );
+        }
 
         // check that Trip Ids match
         if (photo.TripId != tripId)

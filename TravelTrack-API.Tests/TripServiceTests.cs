@@ -764,18 +764,19 @@
             PhotoDto newTripPhoto = new PhotoDto
             {
                 TripId = 2,
-                FileName = "2-invalid-file.pdf",
+                FileName = "sample-trip-img.jpg",
                 AddedByUser = "jmoran@ceiamerica.com",
                 Path = "",
-                Alt = "invalid-file.pdf",
-                FileType = "application/pdf"
+                Alt = "sample-trip-img.jpg",
+                FileType = "image/jpeg"
             };
+            FormFile mockedFile = TestMethods.GetMockedFile(@"./MockedData/sample-trip-img.jpg", "image/jpeg"); 
             TripService tripService = new TripService(_ctx, _mapper, null!);
 
             // --- Act --- 
             try
             {
-                tripService.AddPhotoToTrip(newTripPhoto, null!, tripId);
+                tripService.AddPhotoToTrip(newTripPhoto, mockedFile, tripId);
 
                 //  --- Assert --- 
                 Assert.Fail();
@@ -787,7 +788,7 @@
             }
         }
 
-        [TestCategory("AddPhotoToTrip"), TestCategory("Bad Request"), TestMethod]
+        [TestCategory("AddPhotoToTrip"), TestCategory("Not Found"), TestMethod]
         public void TripService_AddPhotoToTrip_ReturnsNotFoundException()
         {
             // --- Arrange --- 
@@ -796,18 +797,19 @@
             PhotoDto newTripPhoto = new PhotoDto
             {
                 TripId = -9999,
-                FileName = "2-invalid-file.pdf",
+                FileName = "sample-trip-img.jpg",
                 AddedByUser = "jmoran@ceiamerica.com",
                 Path = "",
-                Alt = "invalid-file.pdf",
-                FileType = "application/pdf"
+                Alt = "sample-trip-img.jpg",
+                FileType = "image/jpeg"
             };
+            FormFile mockedFile = TestMethods.GetMockedFile(@"./MockedData/sample-trip-img.jpg", "image/jpeg"); 
             TripService tripService = new TripService(_ctx, _mapper, null!);
 
             // --- Act --- 
             try
             {
-                tripService.AddPhotoToTrip(newTripPhoto, null!, tripId);
+                tripService.AddPhotoToTrip(newTripPhoto, mockedFile, tripId);
 
                 //  --- Assert --- 
                 Assert.Fail();
@@ -914,7 +916,7 @@
             Assert.IsNull(updatedTrip.Photos.FirstOrDefault(p => p.Id == photosToRemove[1].Id));
         }
 
-        [TestCategory("RemovePhotosFromTrip"), TestCategory("BadRequest"), TestMethod]
+        [TestCategory("RemovePhotosFromTrip"), TestCategory("Bad Request"), TestMethod]
         public void TripService_RemovePhotosFromTrip_ReturnsBadRequestNullPhotos()
         {
             // --- Arrange --- 
@@ -938,7 +940,7 @@
             }
         }
 
-        [TestCategory("RemovePhotosFromTrip"), TestCategory("BadRequest"), TestMethod]
+        [TestCategory("RemovePhotosFromTrip"), TestCategory("Bad Request"), TestMethod]
         public void TripService_RemovePhotosFromTrip_ReturnsBadRequestIdMismatch()
         {
             // --- Arrange --- 
@@ -983,7 +985,7 @@
             }
         }
 
-        [TestCategory("RemovePhotosFromTrip"), TestCategory("BadRequest"), TestMethod]
+        [TestCategory("RemovePhotosFromTrip"), TestCategory("Not Found"), TestMethod]
         public void TripService_RemovePhotosFromTrip_ReturnsNotFoundException()
         {
             // --- Arrange --- 
