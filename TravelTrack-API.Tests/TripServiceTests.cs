@@ -46,7 +46,7 @@
             var actualCount = _ctx.Trips.Count();
 
             // Act
-            var<TripDto> tripsResult = tripService.GetAll();
+            var tripsResult = tripService.GetAll();
 
             // Assert 
             Assert.IsInstanceOfType(tripsResult, typeof(List<TripDto>));
@@ -143,7 +143,7 @@
             // Arrange
             var _ctx = NewContext();
             var tripService = new TripService(_ctx, _mapper, null!);
-            TripDto newTrip = null;
+            TripDto newTrip = null!;
 
             // Act
             try
@@ -177,7 +177,7 @@
                 {
                     new DestinationDto { Id = "ChIJw4OtEaZjDowRZCw_jCcczqI", City = "Zemi Beach", Region = "West End", Country = "Anguilla" }
                 },
-                Members = null,
+                Members = null!,
                 ToDo = new List<ToDoDto>
                 {
                     new ToDoDto { Task = "pack clothes", Complete = false },
@@ -216,7 +216,7 @@
                 Details = "Test",
                 StartDate = new DateTime(2030, 1, 1),
                 EndDate = new DateTime(2030, 2, 1),
-                Destinations = null,
+                Destinations = null!,
                 Members = new List<TripUserDto>
                 {
                     new TripUserDto { Username = "jmoran@ceiamerica.com", FirstName = "Jonathan", LastName = "Moran" }
@@ -398,7 +398,7 @@
             var tripService = new TripService(_ctx, _mapper, null!);
             var priorTripCount = _ctx.Trips.Count();
             long id = 1;
-            TripDto changedTrip = null;
+            TripDto changedTrip = null!;
 
 
             // Act
@@ -432,7 +432,7 @@
                 Details = "Changed Details",
                 StartDate = new DateTime(2030, 1, 1),
                 EndDate = new DateTime(2030, 2, 1),
-                Destinations = null,
+                Destinations = null!,
                 Members = new List<TripUserDto>
                 {
                     new TripUserDto { Username = "jmoran@ceiamerica.com", FirstName = "Jonathan", LastName = "Moran" }
@@ -482,7 +482,7 @@
                 {
                     new DestinationDto { Id = "ChIJw4OtEaZjDowRZCw_jCcczqI", City = "Zemi Beach", Region = "West End", Country = "Anguilla" }
                 },
-                Members = null,
+                Members = null!,
                 ToDo = new List<ToDoDto>
                 {
                     new ToDoDto { Task = "pack clothes", Complete = false },
@@ -677,7 +677,7 @@
             string mockReturnedPhotoUrl = "https://fakestorageaccount.blob.core.windows.net/fakecontainer/2-sample-trip-img.jpg";
             long tripId = 3;
 
-            TripService tripService = new TripService(_ctx, _mapper, TestMethods.GetBlobServiceUploadedBlobMock(mockedFile, mockReturnedPhotoUrl));
+            TripService tripService = new TripService(_ctx, _mapper, TestMethods.GetBlobServiceUploadedBlobMock(mockedFile!, mockReturnedPhotoUrl));
             int priorPhotosCount = _ctx.Photos.Count();
             Trip priorVersionOfTrip = _ctx.Trips.FirstOrDefault(t => t.Id == tripId)!;
             int priorTripPhotoCount = priorVersionOfTrip.Photos.Count();
@@ -702,7 +702,7 @@
             // --- Arrange --- 
             TravelTrackContext _ctx = NewContext();
             long tripId = 1;
-            PhotoDto newTripPhoto = null;
+            PhotoDto newTripPhoto = null!;
             FormFile mockPhotoFile = new FormFile(new MemoryStream(), 0, 0, "", "");
             TripService tripService = new TripService(_ctx, _mapper, null!);
 
@@ -919,7 +919,7 @@
         {
             // --- Arrange --- 
             TravelTrackContext _ctx = NewContext();
-            List<PhotoDto> photosToRemove = null;
+            List<PhotoDto> photosToRemove = null!;
             long tripId = 2;
             TripService tripService = new TripService(_ctx, _mapper, null!);
 

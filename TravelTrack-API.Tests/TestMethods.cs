@@ -1,7 +1,4 @@
-﻿using Azure.Storage.Blobs;
-using Microsoft.AspNetCore.Http;
-
-namespace TravelTrack_API.Tests
+﻿namespace TravelTrack_API.Tests
 {
     class TestMethods
     {
@@ -10,7 +7,7 @@ namespace TravelTrack_API.Tests
             string path = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory())!.Parent!.Parent!.FullName, @"./MockedData/sample-trip-img.jpg");
             using (var stream = File.OpenRead(path))
             {
-                return new FormFile(stream, 0, stream.Length, null, Path.GetFileName(path))
+                return new FormFile(stream, 0, stream.Length, null!, Path.GetFileName(path))
                 {
                     Headers = new HeaderDictionary(),
                     ContentType = contentType

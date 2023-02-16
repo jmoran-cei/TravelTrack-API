@@ -667,7 +667,7 @@ public class TripService : ITripService
         photoEntity.Id = Guid.NewGuid();
 
         // upload to blob storage and assign path
-        photoEntity.Path = _blobService.UploadPhotoToStorage(file);
+        photoEntity.Path = _blobService.UploadPhotoToStorage(file!);
 
         _ctx.Photos.Add(photoEntity);
         _ctx.SaveChanges();
