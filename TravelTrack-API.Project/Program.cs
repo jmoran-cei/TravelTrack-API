@@ -89,7 +89,7 @@ builder.Services.AddApiVersioning(options =>
 {
     options.DefaultApiVersion = new ApiVersion(1, 0);
     options.AssumeDefaultVersionWhenUnspecified = true;
-    options.ReportApiVersions = true; // "api-supported-versions: 1.0"
+    options.ReportApiVersions = true; // "api-supported-versions: 1.0, 2.0"
     options.ApiVersionReader = new HeaderApiVersionReader("X-Api-Version");
 });
 

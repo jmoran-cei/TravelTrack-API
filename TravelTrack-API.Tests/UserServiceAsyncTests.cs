@@ -1,17 +1,17 @@
 ﻿namespace TravelTrack_API.Tests
 {
     [TestClass]
-    public class UserServiceTests
+    public class UserServiceAsyncTests
     {
         private readonly IMapper _mapper;
         private readonly DbContextOptions<TravelTrackContext> _contextOptions;
 
-        public UserServiceTests()
+        public UserServiceAsyncTests()
         {
             if (_mapper == null)
             {
                 // create automapper config
-                var mapConfig = new MapperConfiguration(mc =>
+                MapperConfiguration mapConfig = new MapperConfiguration(mc =>
                 {
                     mc.AddProfile(new UserProfile());
                 });
@@ -24,11 +24,11 @@
                 .Options;
 
             // wipe in memory DB
-            using var ctxToBeCleared = new TravelTrackContext(_contextOptions);
+            using TravelTrackContext ctxToBeCleared = new TravelTrackContext(_contextOptions);
             ctxToBeCleared.Database.EnsureDeleted();
 
             // set up in memory DB
-            using var ctx = new TravelTrackContext(_contextOptions);
+            using TravelTrackContext ctx = new TravelTrackContext(_contextOptions);
             ctx.Database.EnsureCreated();
         }
 
@@ -38,15 +38,15 @@
         // Tests for GetAll()
 
         [TestCategory("GetAll"), TestCategory("Successful Functionality"), TestMethod]
-        public void UserService_Get_ReturnsListOfAllUsers()
+        public async Task UserService_Get_ReturnsListOfAllUsers()
         {
             // Arrange
-            var _ctx = NewContext();
-            var userService = new UserService(_ctx, _mapper);
-            var actualCount = _ctx.Users.Count();
+            TravelTrackContext _ctx = NewContext();
+            IUserService userService = new UserService(_ctx, _mapper);
+            int actualCount = _ctx.Users.Count();
 
             // Act
-            var usersResult = userService.GetAll();
+            List<UserDto> usersResult = await userService.GetAllAsync();
 
             // Assert 
             Assert.IsInstanceOfType(usersResult, typeof(List<UserDto>));
@@ -59,33 +59,33 @@
         // Tests for Get()
 
         [TestCategory("Get"), TestCategory("Successful Functionality"), TestMethod]
-        public void UserService_Get_ReturnsCorrectUser()
+        public async Task UserService_Get_ReturnsCorrectUser()
         {
             // Arrange
-            var _ctx = NewContext();
-            var userService = new UserService(_ctx, _mapper);
+            TravelTrackContext _ctx = NewContext();
+            IUserService userService = new UserService(_ctx, _mapper);
             string username = "jmoran@ceiamerica.com";
 
             // Act
-            var userResult = userService.Get(username);
+            UserDto userResult = await userService.GetAsync(username);
 
             // Assert 
             Assert.AreEqual(username, userResult.Username);
         }
 
         [TestCategory("Get"), TestCategory("Not Found"), TestMethod]
-        public void UserService_Get_ThrowsNotFoundException()
+        public async Task UserService_Get_ThrowsNotFoundException()
         {
             // Arrange
-            var _ctx = NewContext();
-            var userService = new UserService(_ctx, _mapper);
+            TravelTrackContext _ctx = NewContext();
+            IUserService userService = new UserService(_ctx, _mapper);
             string username = "nonexistinguser@test.test";
 
 
             // Act
             try
             {
-                var userResult = userService.Get(username);
+                UserDto userResult = await userService.GetAsync(username);
 
                 // Assert
                 Assert.Fail();
@@ -102,13 +102,13 @@
         // Tests for Add()
 
         [TestCategory("Add"), TestCategory("Successful Functionality"), TestMethod]
-        public void UserService_Add_ReturnsSuccessfullyAddedUser()
+        public async Task UserService_Add_ReturnsSuccessfullyAddedUser()
         {
             // Arrange
-            var _ctx = NewContext();
-            var userService = new UserService(_ctx, _mapper);
-            var priorUserCount = _ctx.Users.Count();
-            var newUser = new UserDto
+            TravelTrackContext _ctx = NewContext();
+            IUserService userService = new UserService(_ctx, _mapper);
+            int priorUserCount = _ctx.Users.Count();
+            UserDto newUser = new UserDto
             {
                 Username = "newuser@test.test",
                 Password = "P@ssw0rd",
@@ -117,7 +117,7 @@
             };
 
             // Act
-            var addedUser = userService.Add(newUser);
+            UserDto addedUser = await userService.AddAsync(newUser);
 
             // Assert
             Assert.IsNotNull(_ctx.Users.Find(addedUser.Username));
@@ -125,17 +125,17 @@
         }
 
         [TestCategory("Add"), TestCategory("Bad Request"), TestMethod]
-        public void UserService_Add_ReturnsBadRequestNullUser()
+        public async Task UserService_Add_ReturnsBadRequestNullUser()
         {
             // Arrange
-            var _ctx = NewContext();
-            var userService = new UserService(_ctx, _mapper);
+            TravelTrackContext _ctx = NewContext();
+            IUserService userService = new UserService(_ctx, _mapper);
             UserDto newUser = null!;
 
             // Act
             try
             {
-                var addedUser = userService.Add(newUser);
+                UserDto addedUser = await userService.AddAsync(newUser);
 
                 // Assert
                 Assert.Fail();
@@ -149,12 +149,12 @@
         }
 
         [TestCategory("Add"), TestCategory("Conflict"), TestMethod]
-        public void UserService_Add_ReturnsConflictUserAlreadyExists()
+        public async Task UserService_Add_ReturnsConflictUserAlreadyExists()
         {
             // Arrange
-            var _ctx = NewContext();
-            var userService = new UserService(_ctx, _mapper);
-            var newUser = new UserDto
+            TravelTrackContext _ctx = NewContext();
+            IUserService userService = new UserService(_ctx, _mapper);
+            UserDto newUser = new UserDto
             {
                 Username = "jmoran@ceiamerica.com",
                 Password = "P@ssw0rd",
@@ -165,7 +165,7 @@
             // Act
             try
             {
-                var addedUser = userService.Add(newUser);
+                UserDto addedUser = await userService.AddAsync(newUser);
 
                 // Assert
                 Assert.Fail();
@@ -182,17 +182,17 @@
         // Tests for Delete()
 
         [TestCategory("Delete"), TestCategory("Successful Functionality"), TestMethod]
-        public void UserService_Delete_RemovesUserAndReturnsNothing()
+        public async Task UserService_Delete_RemovesUserAndReturnsNothing()
         {
             // Arrange
-            var _ctx = NewContext();
-            var userService = new UserService(_ctx, _mapper);
-            var priorUserCount = _ctx.Users.Count();
+            TravelTrackContext _ctx = NewContext();
+            IUserService userService = new UserService(_ctx, _mapper);
+            int priorUserCount = _ctx.Users.Count();
             string username = "jmoran@ceiamerica.com";
-            var user = _ctx.Users.Find(username);
+            User user = _ctx.Users.Find(username)!;
 
             // Act
-            userService.Delete(username);
+            await userService.DeleteAsync(username);
 
             // Assert
             Assert.IsNull(_ctx.Users.Find(username));
@@ -200,17 +200,17 @@
         }
 
         [TestCategory("Delete"), TestCategory("Not Found"), TestMethod]
-        public void UserService_Delete_ReturnsNotFoundException()
+        public async Task UserService_Delete_ReturnsNotFoundException()
         {
             // Arrange
-            var _ctx = NewContext();
-            var userService = new UserService(_ctx, _mapper);
+            TravelTrackContext _ctx = NewContext();
+            IUserService userService = new UserService(_ctx, _mapper);
             string username = "nonexistinguser@test.test";
 
             // Act
             try
             {
-                userService.Delete(username);
+                await userService.DeleteAsync(username);
 
                 // Assert
                 Assert.Fail();
@@ -226,15 +226,15 @@
         // Tests for Update()
 
         [TestCategory("Update"), TestCategory("Successful Functionality"), TestMethod]
-        public void UserService_Update_ReturnsSuccessfullyUpdatedUser()
+        public async Task UserService_Update_ReturnsSuccessfullyUpdatedUser()
         {
             // Arrange
-            var _ctx = NewContext();
-            var userService = new UserService(_ctx, _mapper);
-            var priorUserCount = _ctx.Users.Count();
+            TravelTrackContext _ctx = NewContext();
+            IUserService userService = new UserService(_ctx, _mapper);
+            int priorUserCount = _ctx.Users.Count();
             string username = "dummyuser@dummy.dum";
-            var originalUser = userService.Get(username);
-            var changedUser = new UserDto
+            UserDto originalUser = userService.Get(username);
+            UserDto changedUser = new UserDto
             {
                 Username = "dummyuser@dummy.dum",
                 Password = "P@ssw0rd",
@@ -243,7 +243,7 @@
             };
 
             // Act
-            var userResult = userService.Update(username, changedUser);
+            UserDto userResult = await userService.UpdateAsync(username, changedUser);
 
             // Assert
             Assert.IsNotNull(_ctx.Users.Find(userResult.Username));
@@ -252,14 +252,14 @@
         }
 
         [TestCategory("Update"), TestCategory("Bad Request"), TestMethod]
-        public void UserService_Update_ReturnsBadRequestUsernameMismatch()
+        public async Task UserService_Update_ReturnsBadRequestUsernameMismatch()
         {
             // Arrange
-            var _ctx = NewContext();
-            var userService = new UserService(_ctx, _mapper);
-            var priorUserCount = _ctx.Users.Count();
+            TravelTrackContext _ctx = NewContext();
+            IUserService userService = new UserService(_ctx, _mapper);
+            int priorUserCount = _ctx.Users.Count();
             string username = "dummyuser@dummy.dum";
-            var changedUser = new UserDto
+            UserDto changedUser = new UserDto
             {
                 Username = "jmoran@ceiamerica.com",
                 Password = "P@ssw0rd",
@@ -270,7 +270,7 @@
             // Act
             try
             {
-                var userResult = userService.Update(username, changedUser);
+                UserDto userResult = await userService.UpdateAsync(username, changedUser);
 
                 // Assert
                 Assert.Fail();
@@ -284,14 +284,14 @@
         }
 
         [TestCategory("Update"), TestCategory("Not Found"), TestMethod]
-        public void UserService_Update_ReturnsNotFoundException()
+        public async Task UserService_Update_ReturnsNotFoundException()
         {
             // Arrange
-            var _ctx = NewContext();
-            var userService = new UserService(_ctx, _mapper);
-            var priorUserCount = _ctx.Users.Count();
+            TravelTrackContext _ctx = NewContext();
+            IUserService userService = new UserService(_ctx, _mapper);
+            int priorUserCount = _ctx.Users.Count();
             string username = "nonexistinguser@test.test";
-            var changedUser = new UserDto
+            UserDto changedUser = new UserDto
             {
                 Username = "nonexistinguser@test.test",
                 Password = "P@ssw0rd",
@@ -302,7 +302,7 @@
             // Act
             try
             {
-                var userResult = userService.Update(username, changedUser);
+                UserDto userResult = await userService.UpdateAsync(username, changedUser);
 
                 // Assert
                 Assert.Fail();

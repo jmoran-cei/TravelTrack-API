@@ -1,12 +1,12 @@
 ﻿namespace TravelTrack_API.Tests
 {
     [TestClass]
-    public class TripServiceTests
+    public class TripServiceAsyncTests
     {
         private readonly IMapper _mapper;
         private readonly DbContextOptions<TravelTrackContext> _contextOptions;
 
-        public TripServiceTests()
+        public TripServiceAsyncTests()
         {
             if (_mapper == null)
             {
@@ -18,7 +18,7 @@
                 IMapper mapper = mapConfig.CreateMapper();
                 _mapper = mapper;
             }
-            
+
             _contextOptions = new DbContextOptionsBuilder<TravelTrackContext>()
                 .UseInMemoryDatabase(databaseName: "TravelTrackTest")
                 .Options;
@@ -29,24 +29,24 @@
 
             // set up in memory DB
             using TravelTrackContext ctx = new TravelTrackContext(_contextOptions);
-            ctx.Database.EnsureCreated();
+            ctx.Database.EnsureCreatedAsync();
         }
 
         TravelTrackContext NewContext() => new TravelTrackContext(_contextOptions);
 
 
-        // Tests for GetAll()
+        // Tests for GetAllAsync()
 
-        [TestCategory("GetAll"), TestCategory("Successful Functionality"), TestMethod]
-        public void TripService_GetAll_ReturnsListOfAllTrips()
+        [TestCategory("GetAllAsync"), TestCategory("Successful Functionality"), TestMethod]
+        public async Task TripService_GetAllAsync_ReturnsListOfAllTrips()
         {
             // Arrange
-            var _ctx = NewContext();
-            var tripService = new TripService(_ctx, _mapper, null!);
-            var actualCount = _ctx.Trips.Count();
+            TravelTrackContext _ctx = NewContext();
+            ITripService tripService = new TripService(_ctx, _mapper, null!);
+            int actualCount = _ctx.Trips.Count();
 
             // Act
-            var tripsResult = tripService.GetAll();
+            List<TripDto> tripsResult = await tripService.GetAllAsync();
 
             // Assert 
             Assert.IsInstanceOfType(tripsResult, typeof(List<TripDto>));
@@ -56,36 +56,36 @@
             Assert.AreEqual("Another Test Trip", tripsResult[2].Title);
         }
 
-        // Tests for Get()
+        // Tests for GetAsync()
 
-        [TestCategory("Get"), TestCategory("Successful Functionality"), TestMethod]
-        public void TripService_Get_ReturnsCorrectTrip()
+        [TestCategory("GetAsync"), TestCategory("Successful Functionality"), TestMethod]
+        public async Task TripService_GetAsync_ReturnsCorrectTrip()
         {
             // Arrange
-            var _ctx = NewContext();
-            var tripService = new TripService(_ctx, _mapper, null!);
+            TravelTrackContext _ctx = NewContext();
+            ITripService tripService = new TripService(_ctx, _mapper, null!);
             long id = 1;
 
             // Act
-            var tripResult = tripService.Get(id);
+            TripDto tripResult = await tripService.GetAsync(id);
 
-            // Assert 
+            // Assert
             Assert.AreEqual(id, tripResult.Id);
         }
 
-        [TestCategory("Get"), TestCategory("Not Found"), TestMethod]
-        public void TripService_Get_ThrowsNotFoundException()
+        [TestCategory("GetAsync"), TestCategory("Not Found"), TestMethod]
+        public async Task TripService_GetAsync_ThrowsNotFoundException()
         {
             // Arrange
-            var _ctx = NewContext();
-            var tripService = new TripService(_ctx, _mapper, null!);
+            TravelTrackContext _ctx = NewContext();
+            ITripService tripService = new TripService(_ctx, _mapper, null!);
             long id = 9999;
 
 
             // Act
             try
             {
-                TripDto tripResult = tripService.Get(id);
+                TripDto tripResult = await tripService.GetAsync(id);
 
                 // Assert
                 Assert.Fail();
@@ -99,18 +99,18 @@
         }
 
 
-        // Tests for Add()
+        // Tests for AddAsync()
 
-        [TestCategory("Add"), TestCategory("Successful Functionality"), TestMethod]
-        public void TripService_Add_ReturnsSuccessfullyAddedTrip()
+        [TestCategory("AddAsync"), TestCategory("Successful Functionality"), TestMethod]
+        public async Task TripService_AddAsync_ReturnsSuccessfullyAddedTrip()
         {
             // Arrange
-            var _ctx = NewContext();
-            var tripService = new TripService(_ctx, _mapper, null!);
-            var priorTripCount = _ctx.Trips.Count();
-            var priorTripUsersCount = _ctx.TripUsers.Count();
-            var priorTripDestinationsCount = _ctx.TripDestinations.Count();
-            var newTrip = new TripDto
+            TravelTrackContext _ctx = NewContext();
+            ITripService tripService = new TripService(_ctx, _mapper, null!);
+            int priorTripCount = _ctx.Trips.Count();
+            int priorTripUsersCount = _ctx.TripUsers.Count();
+            int priorTripDestinationsCount = _ctx.TripDestinations.Count();
+            TripDto newTrip = new TripDto
             {
                 Title = "New Trip",
                 Details = "Test",
@@ -128,7 +128,7 @@
             };
 
             // Act
-            var addedTrip = tripService.Add(newTrip);
+            TripDto addedTrip = await tripService.AddAsync(newTrip);
 
             // Assert
             Assert.IsNotNull(_ctx.Trips.Find(addedTrip.Id));
@@ -137,18 +137,18 @@
             Assert.AreEqual(priorTripDestinationsCount + +newTrip.Destinations.Count(), _ctx.TripDestinations.Count());
         }
 
-        [TestCategory("Add"), TestCategory("Bad Request"), TestMethod]
-        public void TripService_Add_ReturnsBadRequestNullTrip()
+        [TestCategory("AddAsync"), TestCategory("Bad Request"), TestMethod]
+        public async Task TripService_AddAsync_ReturnsBadRequestNullTrip()
         {
             // Arrange
-            var _ctx = NewContext();
-            var tripService = new TripService(_ctx, _mapper, null!);
+            TravelTrackContext _ctx = NewContext();
+            ITripService tripService = new TripService(_ctx, _mapper, null!);
             TripDto newTrip = null!;
 
             // Act
             try
             {
-                var addedTrip = tripService.Add(newTrip);
+                TripDto addedTrip = await tripService.AddAsync(newTrip);
 
                 // Assert
                 Assert.Fail();
@@ -161,13 +161,13 @@
             }
         }
 
-        [TestCategory("Add"), TestCategory("Bad Request"), TestMethod]
-        public void TripService_Add_ReturnsBadRequestNullTripMembers()
+        [TestCategory("AddAsync"), TestCategory("Bad Request"), TestMethod]
+        public async Task TripService_AddAsync_ReturnsBadRequestNullTripMembers()
         {
             // Arrange
-            var _ctx = NewContext();
-            var tripService = new TripService(_ctx, _mapper, null!);
-            var newTrip = new TripDto
+            TravelTrackContext _ctx = NewContext();
+            ITripService tripService = new TripService(_ctx, _mapper, null!);
+            TripDto newTrip = new TripDto
             {
                 Title = "New Trip",
                 Details = "Test",
@@ -191,7 +191,7 @@
             // Act
             try
             {
-                var addedTrip = tripService.Add(newTrip);
+                TripDto addedTrip = await tripService.AddAsync(newTrip);
 
                 // Assert
                 Assert.Fail();
@@ -204,13 +204,13 @@
             }
         }
 
-        [TestCategory("Add"), TestCategory("Bad Request"), TestMethod]
-        public void TripService_Add_ReturnsBadRequestNullTripDestinations()
+        [TestCategory("AddAsync"), TestCategory("Bad Request"), TestMethod]
+        public async Task TripService_AddAsync_ReturnsBadRequestNullTripDestinations()
         {
             // Arrange
-            var _ctx = NewContext();
-            var tripService = new TripService(_ctx, _mapper, null!);
-            var newTrip = new TripDto
+            TravelTrackContext _ctx = NewContext();
+            ITripService tripService = new TripService(_ctx, _mapper, null!);
+            TripDto newTrip = new TripDto
             {
                 Title = "New Trip",
                 Details = "Test",
@@ -234,7 +234,7 @@
             // Act
             try
             {
-                var addedTrip = tripService.Add(newTrip);
+                TripDto addedTrip = await tripService.AddAsync(newTrip);
 
                 // Assert
                 Assert.Fail();
@@ -247,13 +247,13 @@
             }
         }
 
-        [TestCategory("Add"), TestCategory("Bad Request"), TestMethod]
-        public void TripService_Add_ReturnsBadRequestTripMemberDoesNotExist()
+        [TestCategory("AddAsync"), TestCategory("Bad Request"), TestMethod]
+        public async Task TripService_AddAsync_ReturnsBadRequestTripMemberDoesNotExist()
         {
             // Arrange
-            var _ctx = NewContext();
-            var tripService = new TripService(_ctx, _mapper, null!);
-            var newTrip = new TripDto
+            TravelTrackContext _ctx = NewContext();
+            ITripService tripService = new TripService(_ctx, _mapper, null!);
+            TripDto newTrip = new TripDto
             {
                 Title = "New Trip",
                 Details = "Test",
@@ -280,7 +280,7 @@
             // Act
             try
             {
-                var addedTrip = tripService.Add(newTrip);
+                TripDto addedTrip = await tripService.AddAsync(newTrip);
 
                 // Assert
                 Assert.Fail();
@@ -293,24 +293,24 @@
             }
         }
 
-        // Tests for Delete()
+        // Tests for DeleteAsync()
 
-        [TestCategory("Delete"), TestCategory("Successful Functionality"), TestMethod]
-        public void TripService_Delete_RemovesTripAndReturnsNothing()
+        [TestCategory("DeleteAsync"), TestCategory("Successful Functionality"), TestMethod]
+        public async Task TripService_DeleteAsync_RemovesTripAndReturnsNothing()
         {
             // Arrange
-            var _ctx = NewContext();
-            var tripService = new TripService(_ctx, _mapper, TestMethods.GetBlobServiceDeleteBlobMock(true));
-            var priorTripCount = _ctx.Trips.Count();
-            var priorTripUserCount = _ctx.TripUsers.Count();
-            var priorTripDestinationCount = _ctx.TripDestinations.Count();
-            var priorToDoCount = _ctx.ToDo.Count();
-            var priorPhotosCount = _ctx.Photos.Count();
+            TravelTrackContext _ctx = NewContext();
+            ITripService tripService = new TripService(_ctx, _mapper, TestMethods.GetBlobServiceDeleteBlobAsyncMock(true));
+            int priorTripCount = _ctx.Trips.Count();
+            int priorTripUserCount = _ctx.TripUsers.Count();
+            int priorTripDestinationCount = _ctx.TripDestinations.Count();
+            int priorToDoCount = _ctx.ToDo.Count();
+            int priorPhotosCount = _ctx.Photos.Count();
             long id = 1;
-            var trip = _ctx.Trips.Find(id);
+            Trip trip = _ctx.Trips.Find(id);
 
             // Act
-            tripService.Delete(id);
+            await tripService.DeleteAsync(id);
 
             // Assert
             Assert.IsNull(_ctx.Trips.Find(id));
@@ -321,18 +321,18 @@
             Assert.AreEqual(priorPhotosCount - trip!.Photos.Count(), _ctx.Photos.Count());
         }
 
-        [TestCategory("Delete"), TestCategory("Not Found"), TestMethod]
-        public void TripService_Delete_ReturnsNotFoundException()
+        [TestCategory("DeleteAsync"), TestCategory("Not Found"), TestMethod]
+        public async Task TripService_DeleteAsync_ReturnsNotFoundException()
         {
             // Arrange
-            var _ctx = NewContext();
-            var tripService = new TripService(_ctx, _mapper, null!);
+            TravelTrackContext _ctx = NewContext();
+            ITripService tripService = new TripService(_ctx, _mapper, null!);
             long id = 9999;
 
             // Act
             try
             {
-                tripService.Delete(id);
+                await tripService.DeleteAsync(id);
 
                 // Assert
                 Assert.Fail();
@@ -345,18 +345,18 @@
             }
         }
 
-        // Tests for Update()
+        // Tests for UpdateAsync()
 
-        [TestCategory("Update"), TestCategory("Successful Functionality"), TestMethod]
-        public void TripService_Update_ReturnsSuccessfullyUpdatedTrip()
+        [TestCategory("UpdateAsync"), TestCategory("Successful Functionality"), TestMethod]
+        public async Task TripService_UpdateAsync_ReturnsSuccessfullyUpdatedTrip()
         {
             // Arrange
-            var _ctx = NewContext();
-            var tripService = new TripService(_ctx, _mapper, null!);
-            var priorTripCount = _ctx.Trips.Count();
+            TravelTrackContext _ctx = NewContext();
+            ITripService tripService = new TripService(_ctx, _mapper, null!);
+            int priorTripCount = _ctx.Trips.Count();
             long id = 1;
-            var originalTrip = tripService.Get(id);
-            var changedTrip = new TripDto
+            TripDto originalTrip = await tripService.GetAsync(id);
+            TripDto changedTrip = new TripDto
             {
                 Id = 1,
                 Title = "Changed Trip",
@@ -382,7 +382,7 @@
             };
 
             // Act
-            var tripResult = tripService.Update(id, changedTrip);
+            TripDto tripResult = await tripService.UpdateAsync(id, changedTrip);
 
             // Assert
             Assert.IsNotNull(_ctx.Trips.Find(tripResult.Id));
@@ -390,13 +390,13 @@
             Assert.AreNotEqual(tripResult.Title, originalTrip!.Title);
         }
 
-        [TestCategory("Update"), TestCategory("Bad Request"), TestMethod]
-        public void TripService_Update_ReturnsBadRequestNullTrip()
+        [TestCategory("UpdateAsync"), TestCategory("Bad Request"), TestMethod]
+        public async Task TripService_UpdateAsync_ReturnsBadRequestNullTrip()
         {
             // Arrange
-            var _ctx = NewContext();
-            var tripService = new TripService(_ctx, _mapper, null!);
-            var priorTripCount = _ctx.Trips.Count();
+            TravelTrackContext _ctx = NewContext();
+            ITripService tripService = new TripService(_ctx, _mapper, null!);
+            int priorTripCount = _ctx.Trips.Count();
             long id = 1;
             TripDto changedTrip = null!;
 
@@ -404,7 +404,7 @@
             // Act
             try
             {
-                var tripResult = tripService.Update(id, changedTrip);
+                TripDto tripResult = await tripService.UpdateAsync(id, changedTrip);
 
                 // Assert
                 Assert.Fail();
@@ -417,15 +417,15 @@
             }
         }
 
-        [TestCategory("Update"), TestCategory("Bad Request"), TestMethod]
-        public void TripService_Update_ReturnsBadRequestNullTripDestinations()
+        [TestCategory("UpdateAsync"), TestCategory("Bad Request"), TestMethod]
+        public async Task TripService_UpdateAsync_ReturnsBadRequestNullTripDestinations()
         {
             // Arrange
-            var _ctx = NewContext();
-            var tripService = new TripService(_ctx, _mapper, null!);
-            var priorTripCount = _ctx.Trips.Count();
+            TravelTrackContext _ctx = NewContext();
+            ITripService tripService = new TripService(_ctx, _mapper, null!);
+            int priorTripCount = _ctx.Trips.Count();
             long id = 1;
-            var changedTrip = new TripDto
+            TripDto changedTrip = new TripDto
             {
                 Id = 1,
                 Title = "Changed Trip",
@@ -450,7 +450,7 @@
             // Act
             try
             {
-                var tripResult = tripService.Update(id, changedTrip);
+                TripDto tripResult = await tripService.UpdateAsync(id, changedTrip);
 
                 // Assert
                 Assert.Fail();
@@ -463,15 +463,15 @@
             }
         }
 
-        [TestCategory("Update"), TestCategory("Bad Request"), TestMethod]
-        public void TripService_Update_ReturnsBadRequestNullTripMembers()
+        [TestCategory("UpdateAsync"), TestCategory("Bad Request"), TestMethod]
+        public async Task TripService_UpdateAsync_ReturnsBadRequestNullTripMembers()
         {
             // Arrange
-            var _ctx = NewContext();
-            var tripService = new TripService(_ctx, _mapper, null!);
-            var priorTripCount = _ctx.Trips.Count();
+            TravelTrackContext _ctx = NewContext();
+            ITripService tripService = new TripService(_ctx, _mapper, null!);
+            int priorTripCount = _ctx.Trips.Count();
             long id = 1;
-            var changedTrip = new TripDto
+            TripDto changedTrip = new TripDto
             {
                 Id = 1,
                 Title = "Changed Trip",
@@ -496,7 +496,7 @@
             // Act
             try
             {
-                var tripResult = tripService.Update(id, changedTrip);
+                TripDto tripResult = await tripService.UpdateAsync(id, changedTrip);
 
                 // Assert
                 Assert.Fail();
@@ -509,15 +509,15 @@
             }
         }
 
-        [TestCategory("Update"), TestCategory("Bad Request"), TestMethod]
-        public void TripService_Update_ReturnsBadRequestIdMismatch()
+        [TestCategory("UpdateAsync"), TestCategory("Bad Request"), TestMethod]
+        public async Task TripService_UpdateAsync_ReturnsBadRequestIdMismatch()
         {
             // Arrange
-            var _ctx = NewContext();
-            var tripService = new TripService(_ctx, _mapper, null!);
-            var priorTripCount = _ctx.Trips.Count();
+            TravelTrackContext _ctx = NewContext();
+            ITripService tripService = new TripService(_ctx, _mapper, null!);
+            int priorTripCount = _ctx.Trips.Count();
             long id = 1;
-            var changedTrip = new TripDto
+            TripDto changedTrip = new TripDto
             {
                 Id = 2,
                 Title = "Changed Trip",
@@ -545,7 +545,7 @@
             // Act
             try
             {
-                var tripResult = tripService.Update(id, changedTrip);
+                TripDto tripResult = await tripService.UpdateAsync(id, changedTrip);
 
                 // Assert
                 Assert.Fail();
@@ -558,15 +558,15 @@
             }
         }
 
-        [TestCategory("Update"), TestCategory("Bad Request"), TestMethod]
-        public void TripService_Update_ReturnsBadRequestTripMemberDoesNotExist()
+        [TestCategory("UpdateAsync"), TestCategory("Bad Request"), TestMethod]
+        public async Task TripService_UpdateAsync_ReturnsBadRequestTripMemberDoesNotExist()
         {
             // Arrange
-            var _ctx = NewContext();
-            var tripService = new TripService(_ctx, _mapper, null!);
-            var priorTripCount = _ctx.Trips.Count();
+            TravelTrackContext _ctx = NewContext();
+            ITripService tripService = new TripService(_ctx, _mapper, null!);
+            int priorTripCount = _ctx.Trips.Count();
             long id = 1;
-            var changedTrip = new TripDto
+            TripDto changedTrip = new TripDto
             {
                 Id = 1,
                 Title = "Changed Trip",
@@ -594,7 +594,7 @@
             // Act
             try
             {
-                var tripResult = tripService.Update(id, changedTrip);
+                TripDto tripResult = await tripService.UpdateAsync(id, changedTrip);
 
                 // Assert
                 Assert.Fail();
@@ -607,15 +607,15 @@
             }
         }
 
-        [TestCategory("Update"), TestCategory("Not Found"), TestMethod]
-        public void TripService_Update_ReturnsNotFoundException()
+        [TestCategory("UpdateAsync"), TestCategory("Not Found"), TestMethod]
+        public async Task TripService_UpdateAsync_ReturnsNotFoundException()
         {
             // Arrange
-            var _ctx = NewContext();
-            var tripService = new TripService(_ctx, _mapper, null!);
-            var priorTripCount = _ctx.Trips.Count();
+            TravelTrackContext _ctx = NewContext();
+            ITripService tripService = new TripService(_ctx, _mapper, null!);
+            int priorTripCount = _ctx.Trips.Count();
             long id = 9999;
-            var changedTrip = new TripDto
+            TripDto changedTrip = new TripDto
             {
                 Id = 9999,
                 Title = "Changed Trip",
@@ -643,7 +643,7 @@
             // Act
             try
             {
-                var tripResult = tripService.Update(id, changedTrip);
+                TripDto tripResult = await tripService.UpdateAsync(id, changedTrip);
 
                 // Assert
                 Assert.Fail();
@@ -657,10 +657,11 @@
         }
 
 
-        // Tests for AddPhotoToTrip()
+        
+        // Tests for AddPhotoToTripAsync()
 
-        [TestCategory("AddPhotoToTrip"), TestCategory("Successful Functionality"), TestMethod]
-        public void TripService_AddPhotoToTrip_ReturnsSuccessfullyUpdatedTrip()
+        [TestCategory("AddPhotoToTripAsync"), TestCategory("Successful Functionality"), TestMethod]
+        public async Task TripService_AddPhotoToTripAsync_ReturnsSuccessfullyUpdatedTrip()
         {
             // --- Arrange --- 
             TravelTrackContext _ctx = NewContext();
@@ -677,14 +678,14 @@
             string mockReturnedPhotoUrl = "https://fakestorageaccount.blob.core.windows.net/fakecontainer/2-sample-trip-img.jpg";
             long tripId = 3;
 
-            TripService tripService = new TripService(_ctx, _mapper, TestMethods.GetBlobServiceUploadedBlobMock(mockedFile!, mockReturnedPhotoUrl));
+            ITripService tripService = new TripService(_ctx, _mapper, TestMethods.GetBlobServiceUploadedBlobAsyncMock(mockedFile!, mockReturnedPhotoUrl));
             int priorPhotosCount = _ctx.Photos.Count();
             Trip priorVersionOfTrip = _ctx.Trips.FirstOrDefault(t => t.Id == tripId)!;
             int priorTripPhotoCount = priorVersionOfTrip.Photos.Count();
 
 
             // --- Act --- 
-            TripDto updatedTrip = tripService.AddPhotoToTrip(newTripPhoto, mockedFile, tripId);
+            TripDto updatedTrip = await tripService.AddPhotoToTripAsync(newTripPhoto, mockedFile, tripId);
 
 
             // --- Assert --- 
@@ -696,20 +697,20 @@
             Assert.AreEqual(mockReturnedPhotoUrl, updatedTrip.Photos.FirstOrDefault(p => p.FileName == newTripPhoto.FileName)!.Path);
         }
 
-        [TestCategory("AddPhotoToTrip"), TestCategory("Bad Request"), TestMethod]
-        public void TripService_AddPhotoToTrip_ReturnsNullPhoto()
+        [TestCategory("AddPhotoToTripAsync"), TestCategory("Bad Request"), TestMethod]
+        public async Task TripService_AddPhotoToTripAsync_ReturnsNullPhoto()
         {
             // --- Arrange --- 
             TravelTrackContext _ctx = NewContext();
             long tripId = 1;
             PhotoDto newTripPhoto = null!;
             FormFile mockPhotoFile = new FormFile(new MemoryStream(), 0, 0, "", "");
-            TripService tripService = new TripService(_ctx, _mapper, null!);
+            ITripService tripService = new TripService(_ctx, _mapper, null!);
 
             // --- Act --- 
             try
             {
-                tripService.AddPhotoToTrip(newTripPhoto, mockPhotoFile, tripId);
+                await tripService.AddPhotoToTripAsync(newTripPhoto, mockPhotoFile, tripId);
 
                 //  --- Assert --- 
                 Assert.Fail();
@@ -721,8 +722,8 @@
             }
         }
 
-        [TestCategory("AddPhotoToTrip"), TestCategory("Bad Request"), TestMethod]
-        public void TripService_AddPhotoToTrip_ReturnsBadRequestInvalidFileType()
+        [TestCategory("AddPhotoToTripAsync"), TestCategory("Bad Request"), TestMethod]
+        public async Task TripService_AddPhotoToTripAsync_ReturnsBadRequestInvalidFileType()
         {
             // --- Arrange --- 
             TravelTrackContext _ctx = NewContext();
@@ -738,12 +739,12 @@
             };
             FormFile mockedFile = TestMethods.GetMockedFile(@"./MockedData/sample-trip-img.jpg", "application/pdf");
 
-            TripService tripService = new TripService(_ctx, _mapper, null!);
+            ITripService tripService = new TripService(_ctx, _mapper, null!);
 
             // --- Act --- 
             try
             {
-                tripService.AddPhotoToTrip(newTripPhoto, mockedFile, tripId);
+                await tripService.AddPhotoToTripAsync(newTripPhoto, mockedFile, tripId);
 
                 //  --- Assert --- 
                 Assert.Fail();
@@ -755,8 +756,8 @@
             }
         }
 
-        [TestCategory("AddPhotoToTrip"), TestCategory("Bad Request"), TestMethod]
-        public void TripService_AddPhotoToTrip_ReturnsBadRequestIdMismatch()
+        [TestCategory("AddPhotoToTripAsync"), TestCategory("Bad Request"), TestMethod]
+        public async Task TripService_AddPhotoToTripAsync_ReturnsBadRequestIdMismatch()
         {
             // --- Arrange --- 
             TravelTrackContext _ctx = NewContext();
@@ -770,13 +771,13 @@
                 Alt = "sample-trip-img.jpg",
                 FileType = "image/jpeg"
             };
-            FormFile mockedFile = TestMethods.GetMockedFile(@"./MockedData/sample-trip-img.jpg", "image/jpeg"); 
-            TripService tripService = new TripService(_ctx, _mapper, null!);
+            FormFile mockedFile = TestMethods.GetMockedFile(@"./MockedData/sample-trip-img.jpg", "image/jpeg");
+            ITripService tripService = new TripService(_ctx, _mapper, null!);
 
             // --- Act --- 
             try
             {
-                tripService.AddPhotoToTrip(newTripPhoto, mockedFile, tripId);
+                await tripService.AddPhotoToTripAsync(newTripPhoto, mockedFile, tripId);
 
                 //  --- Assert --- 
                 Assert.Fail();
@@ -788,8 +789,8 @@
             }
         }
 
-        [TestCategory("AddPhotoToTrip"), TestCategory("Not Found"), TestMethod]
-        public void TripService_AddPhotoToTrip_ReturnsNotFoundException()
+        [TestCategory("AddPhotoToTripAsync"), TestCategory("Not Found"), TestMethod]
+        public async Task TripService_AddPhotoToTripAsync_ReturnsNotFoundException()
         {
             // --- Arrange --- 
             TravelTrackContext _ctx = NewContext();
@@ -803,13 +804,13 @@
                 Alt = "sample-trip-img.jpg",
                 FileType = "image/jpeg"
             };
-            FormFile mockedFile = TestMethods.GetMockedFile(@"./MockedData/sample-trip-img.jpg", "image/jpeg"); 
-            TripService tripService = new TripService(_ctx, _mapper, null!);
+            FormFile mockedFile = TestMethods.GetMockedFile(@"./MockedData/sample-trip-img.jpg", "image/jpeg");
+            ITripService tripService = new TripService(_ctx, _mapper, null!);
 
             // --- Act --- 
             try
             {
-                tripService.AddPhotoToTrip(newTripPhoto, mockedFile, tripId);
+                await tripService.AddPhotoToTripAsync(newTripPhoto, mockedFile, tripId);
 
                 //  --- Assert --- 
                 Assert.Fail();
@@ -821,8 +822,8 @@
             }
         }
 
-        [TestCategory("AddPhotoToTrip"), TestCategory("Bad Request"), TestMethod]
-        public void TripService_AddPhotoToTrip_ReturnsConflictException()
+        [TestCategory("AddPhotoToTripAsync"), TestCategory("Bad Request"), TestMethod]
+        public async Task TripService_AddPhotoToTripAsync_ReturnsConflictException()
         {
             // --- Arrange --- 
             TravelTrackContext _ctx = NewContext();
@@ -839,7 +840,7 @@
             FormFile mockedFile = TestMethods.GetMockedFile(@"./MockedData/sample-trip-img.jpg", "image/jpeg");
             string mockReturnedPhotoUrl = "https://fakestorageaccount.blob.core.windows.net/fakecontainer/2-sample-trip-img.jpg";
 
-            TripService tripService = new TripService(_ctx, _mapper, TestMethods.GetBlobServiceUploadedBlobMock(mockedFile, mockReturnedPhotoUrl));
+            ITripService tripService = new TripService(_ctx, _mapper, TestMethods.GetBlobServiceUploadedBlobAsyncMock(mockedFile, mockReturnedPhotoUrl));
             int priorPhotosCount = _ctx.Photos.Count();
             Trip priorVersionOfTrip = _ctx.Trips.FirstOrDefault(t => t.Id == tripId)!;
             int priorTripPhotoCount = priorVersionOfTrip.Photos.Count();
@@ -849,9 +850,9 @@
             try
             {
                 // add photo successfully
-                tripService.AddPhotoToTrip(newTripPhoto, mockedFile, tripId);
+                await tripService.AddPhotoToTripAsync(newTripPhoto, mockedFile, tripId);
                 // try adding the same photo again
-                tripService.AddPhotoToTrip(newTripPhoto, mockedFile, tripId);
+                await tripService.AddPhotoToTripAsync(newTripPhoto, mockedFile, tripId);
 
                 //  --- Assert --- 
                 Assert.Fail();
@@ -864,10 +865,11 @@
         }
 
 
-        // Tests for RemovePhotosFromTrip()
 
-        [TestCategory("RemovePhotosFromTrip"), TestCategory("Successful Functionality"), TestMethod]
-        public void TripService_RemovePhotosFromTrip_ReturnsSuccessfullyUpdatedTrip()
+        // Tests for RemovePhotosFromTripAsync()
+
+        [TestCategory("RemovePhotosFromTripAsync"), TestCategory("Successful Functionality"), TestMethod]
+        public async Task TripService_RemovePhotosFromTripAsync_ReturnsSuccessfullyUpdatedTrip()
         {
             // --- Arrange --- 
             TravelTrackContext _ctx = NewContext();
@@ -895,14 +897,14 @@
             };
             long tripId = 1;
 
-            TripService tripService = new TripService(_ctx, _mapper, TestMethods.GetBlobServiceDeleteBlobMock(true));
+            ITripService tripService = new TripService(_ctx, _mapper, TestMethods.GetBlobServiceDeleteBlobAsyncMock(true));
             int priorPhotosCount = _ctx.Photos.Count();
             Trip priorVersionOfTrip = _ctx.Trips.FirstOrDefault(t => t.Id == tripId)!;
             int priorTripPhotoCount = priorVersionOfTrip.Photos.Count();
 
 
             // --- Act --- 
-            TripDto updatedTrip = tripService.RemovePhotosFromTrip(photosToRemove, tripId);
+            TripDto updatedTrip = await tripService.RemovePhotosFromTripAsync(photosToRemove, tripId);
 
 
             // --- Assert ---
@@ -916,19 +918,19 @@
             Assert.IsNull(updatedTrip.Photos.FirstOrDefault(p => p.Id == photosToRemove[1].Id));
         }
 
-        [TestCategory("RemovePhotosFromTrip"), TestCategory("Bad Request"), TestMethod]
-        public void TripService_RemovePhotosFromTrip_ReturnsBadRequestNullPhotos()
+        [TestCategory("RemovePhotosFromTripAsync"), TestCategory("Bad Request"), TestMethod]
+        public async Task TripService_RemovePhotosFromTripAsync_ReturnsBadRequestNullPhotos()
         {
             // --- Arrange --- 
             TravelTrackContext _ctx = NewContext();
             List<PhotoDto> photosToRemove = null!;
             long tripId = 2;
-            TripService tripService = new TripService(_ctx, _mapper, null!);
+            ITripService tripService = new TripService(_ctx, _mapper, null!);
 
             // --- Act --- 
             try
             {
-                TripDto updatedTrip = tripService.RemovePhotosFromTrip(photosToRemove, tripId);
+                TripDto updatedTrip = await tripService.RemovePhotosFromTripAsync(photosToRemove, tripId);
 
                 // --- Assert ---
                 Assert.Fail();
@@ -940,8 +942,8 @@
             }
         }
 
-        [TestCategory("RemovePhotosFromTrip"), TestCategory("Bad Request"), TestMethod]
-        public void TripService_RemovePhotosFromTrip_ReturnsBadRequestIdMismatch()
+        [TestCategory("RemovePhotosFromTripAsync"), TestCategory("Bad Request"), TestMethod]
+        public async Task TripService_RemovePhotosFromTripAsync_ReturnsBadRequestIdMismatch()
         {
             // --- Arrange --- 
             TravelTrackContext _ctx = NewContext();
@@ -968,12 +970,12 @@
                 }
             };
             long tripId = 3;
-            TripService tripService = new TripService(_ctx, _mapper, null!);
+            ITripService tripService = new TripService(_ctx, _mapper, null!);
 
             // --- Act --- 
             try
             {
-                TripDto updatedTrip = tripService.RemovePhotosFromTrip(photosToRemove, tripId);
+                TripDto updatedTrip = await tripService.RemovePhotosFromTripAsync(photosToRemove, tripId);
 
                 // --- Assert ---
                 Assert.Fail();
@@ -985,8 +987,8 @@
             }
         }
 
-        [TestCategory("RemovePhotosFromTrip"), TestCategory("Not Found"), TestMethod]
-        public void TripService_RemovePhotosFromTrip_ReturnsNotFoundException()
+        [TestCategory("RemovePhotosFromTripAsync"), TestCategory("Not Found"), TestMethod]
+        public async Task TripService_RemovePhotosFromTripAsync_ReturnsNotFoundException()
         {
             // --- Arrange --- 
             TravelTrackContext _ctx = NewContext();
@@ -1013,12 +1015,12 @@
                 }
             };
             long tripId = -9999;
-            TripService tripService = new TripService(_ctx, _mapper, null!);
+            ITripService tripService = new TripService(_ctx, _mapper, null!);
 
             // --- Act --- 
             try
             {
-                TripDto updatedTrip = tripService.RemovePhotosFromTrip(photosToRemove, tripId);
+                TripDto updatedTrip = await tripService.RemovePhotosFromTripAsync(photosToRemove, tripId);
 
                 // --- Assert ---
                 Assert.Fail();
