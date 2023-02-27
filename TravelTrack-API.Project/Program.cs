@@ -1,9 +1,12 @@
 using System.Reflection;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
 using TravelTrack_API.Authorization;
+using TravelTrack_API.Authorization.Policies;
 using TravelTrack_API.DbContexts;
 using TravelTrack_API.Services;
 using TravelTrack_API.Services.BlobManagement;
@@ -13,6 +16,7 @@ bool isProduction = builder.Environment.IsProduction();
 string dbConnectionString = "Server=localhost; Database=TravelTrackDB; Trusted_Connection=True;"; // dev
 string ApiKeyValue = "dev"; // dev
 
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(
@@ -20,11 +24,57 @@ builder.Services.AddCors(options =>
         {
             policy.WithOrigins("https://localhost:7194", "http://localhost:4200", "https://bootcamp-traveltrack.azurewebsites.net");
             policy.WithMethods("GET", "POST", "OPTIONS", "PUT", "DELETE");
-            policy.WithHeaders("Content-Type", "X-Api-Key", "X-Api-Version");
+            policy.WithHeaders("Content-Type", "X-Api-Key", "X-Api-Version", "Authorization");
+            policy.AllowCredentials();
         });
 });
 
-// Add services to the container.
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddMicrosoftIdentityWebApi(options =>
+        {
+            builder.Configuration.Bind("AzureAdB2C", options);
+
+            options.TokenValidationParameters.NameClaimType = "name";
+        },
+        options =>
+        {
+            builder.Configuration.Bind("AzureAdB2C", options);
+        });
+
+builder.Services.AddAuthorization(options =>
+{
+    // ---- Trip Scopes ---
+    // Create policy to check for the scope 'Read'
+    options.AddPolicy("TripReadScope",
+        policy => policy.Requirements.Add(
+            new ScopesRequirement(
+                "https://TravelTrackApp.onmicrosoft.com/TravelTrack/api/Trips.Read"))
+        );
+
+    // Create policy to check for the scope 'Write'
+    options.AddPolicy("TripWriteScope",
+        policy => policy.Requirements.Add(
+            new ScopesRequirement(
+                "https://TravelTrackApp.onmicrosoft.com/TravelTrack/api/Trips.Write"))
+        );
+
+
+
+    // ---- User scopes ---
+    // Create policy to check for the scope 'Read'
+    options.AddPolicy("TripReadScope",
+        policy => policy.Requirements.Add(
+            new ScopesRequirement(
+                "https://TravelTrackApp.onmicrosoft.com/TravelTrack/api/User.Read"))
+        );
+
+    // Create policy to check for the scope 'Write'
+    options.AddPolicy("TripReadScope",
+        policy => policy.Requirements.Add(
+            new ScopesRequirement(
+                "https://TravelTrackApp.onmicrosoft.com/TravelTrack/api/User.Write"))
+        );
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -116,6 +166,8 @@ app.UseCors();
 app.UseHttpsRedirection();
 
 app.UseMiddleware<ApiKeyMiddleware>(ApiKeyValue);
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

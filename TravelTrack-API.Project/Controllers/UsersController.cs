@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Cors;
 using http = System.Web.Http;
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Identity.Web.Resource;
 
 namespace Users.Controllers;
 
@@ -15,6 +17,7 @@ namespace Users.Controllers;
 [Consumes("application/json")]
 [Route("api/[controller]")]
 [EnableCors()]
+[Authorize]
 public class UsersController : ControllerBase
 {
     private readonly IUserService _userService;
@@ -35,6 +38,10 @@ public class UsersController : ControllerBase
     [ApiVersion("1.0")]
     [HttpGet]
     [ProducesResponseType(typeof(UserDto[]), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [RequiredScope("User.Read")]
     public ActionResult<List<UserDto>> GetAll()
     { 
         try
@@ -53,6 +60,10 @@ public class UsersController : ControllerBase
     [ApiVersion("2.0")]
     [HttpGet]
     [ProducesResponseType(typeof(UserDto[]), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [RequiredScope("User.Read")]
     public async Task<ActionResult<List<UserDto>>> GetAllAsync()
     {
         try
@@ -74,7 +85,11 @@ public class UsersController : ControllerBase
     [ApiVersion("1.0")]
     [HttpGet("{username}")]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [RequiredScope("User.Read")]
     public ActionResult<UserDto> Get(string username)
     {
         try
@@ -104,7 +119,11 @@ public class UsersController : ControllerBase
     [ApiVersion("2.0")]
     [HttpGet("{username}")]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [RequiredScope("User.Read")]
     public async Task<ActionResult<UserDto>> GetAsync(string username)
     {
         try
@@ -138,6 +157,10 @@ public class UsersController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [RequiredScope("User.Write")]
     public IActionResult Create(UserDto user)
     {
         try
@@ -177,6 +200,10 @@ public class UsersController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [RequiredScope("User.Write")]
     public async Task<IActionResult> CreateAsync(UserDto user)
     {
         try
@@ -219,7 +246,11 @@ public class UsersController : ControllerBase
     [HttpPut("{username}")]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [RequiredScope("User.Write")]
     public IActionResult Update(string username, UserDto user)
     {
         try
@@ -292,7 +323,11 @@ public class UsersController : ControllerBase
     [HttpDelete("{username}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [RequiredScope("User.Write")]
     public IActionResult Delete(string username)
     {
         try
@@ -328,7 +363,11 @@ public class UsersController : ControllerBase
     [HttpDelete("{username}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [RequiredScope("User.Write")]
     public async Task<IActionResult> DeleteAsync(string username)
     {
         try

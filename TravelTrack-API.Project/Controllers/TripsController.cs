@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Cors;
 using http = System.Web.Http;
 using System.Net;
+using Microsoft.Identity.Web.Resource;
+using Microsoft.Identity.Web;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Trips.Controllers;
 
@@ -15,6 +18,7 @@ namespace Trips.Controllers;
 [Consumes("application/json")]
 [Route("api/[controller]")]
 [EnableCors()]
+[Authorize]
 public class TripsController : ControllerBase
 {
     private readonly ITripService _tripService;
@@ -34,7 +38,11 @@ public class TripsController : ControllerBase
     /// </summary>
     [ApiVersion("1.0")]
     [HttpGet]
-    [ProducesResponseType(typeof(TripDto[]), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<TripDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [RequiredScope("Trips.Read")]
     public ActionResult<List<TripDto>> GetAll()
     {
         try
@@ -52,7 +60,11 @@ public class TripsController : ControllerBase
 
     [ApiVersion("2.0")]
     [HttpGet]
-    [ProducesResponseType(typeof(TripDto[]), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<TripDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [RequiredScope("Trips.Read")]
     public async Task<ActionResult<List<TripDto>>> GetAllAsync()
     {
         try
@@ -76,7 +88,11 @@ public class TripsController : ControllerBase
     [ApiVersion("1.0")]
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(TripDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [RequiredScope("Trips.Read")]
     public ActionResult<TripDto> Get(long id)
     {
         try
@@ -106,7 +122,11 @@ public class TripsController : ControllerBase
     [ApiVersion("2.0")]
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(TripDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [RequiredScope("Trips.Read")]
     public async Task<ActionResult<TripDto>> GetAsync(long id)
     {
         try
@@ -142,6 +162,10 @@ public class TripsController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(TripDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [RequiredScope("Trips.Write")]
     public IActionResult Create(TripDto trip)
     {
         try
@@ -176,7 +200,11 @@ public class TripsController : ControllerBase
     [ApiVersion("2.0")]
     [HttpPost]
     [ProducesResponseType(typeof(TripDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [RequiredScope("Trips.Write")]
     public async Task<IActionResult> CreateAsync(TripDto trip)
     {
         try
@@ -217,7 +245,11 @@ public class TripsController : ControllerBase
     [ApiVersion("1.0")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [RequiredScope("Trips.Write")]
     public IActionResult Update(long id, TripDto trip)
     {
         try
@@ -252,7 +284,11 @@ public class TripsController : ControllerBase
     [ApiVersion("2.0")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [RequiredScope("Trips.Write")]
     public async Task<IActionResult> UpdateAsync(long id, TripDto trip)
     {
         try
@@ -292,7 +328,11 @@ public class TripsController : ControllerBase
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [RequiredScope("Trips.Write")]
     public IActionResult Delete(long id)
     {
         try
@@ -329,7 +369,11 @@ public class TripsController : ControllerBase
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [RequiredScope("Trips.Write")]
     public async Task<IActionResult> DeleteAsync(long id)
     {
         try
@@ -370,8 +414,13 @@ public class TripsController : ControllerBase
     [ApiVersion("1.0")]
     [HttpPut("{id}/addphoto")]
     [Consumes("multipart/form-data")]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(TripDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [RequiredScope("Trips.Write")]
     public IActionResult AddPhoto([FromForm] PhotoDto photo, [FromRoute]long id)
     {
         try
@@ -424,8 +473,13 @@ public class TripsController : ControllerBase
     [ApiVersion("2.0")]
     [HttpPut("{id}/addphoto")]
     [Consumes("multipart/form-data")]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(TripDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [RequiredScope("Trips.Write")]
     public async Task<IActionResult> AddPhotoAsync([FromForm] PhotoDto photo, [FromRoute] long id)
     {
         try
@@ -482,8 +536,13 @@ public class TripsController : ControllerBase
     /// </summary>
     [ApiVersion("1.0")]
     [HttpPut("{id}/removephotos")]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(TripDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [RequiredScope("Trips.Write")]
     public IActionResult RemovePhotos(List<PhotoDto> photos, [FromRoute] long id)
     {
         try
@@ -517,8 +576,13 @@ public class TripsController : ControllerBase
 
     [ApiVersion("2.0")]
     [HttpPut("{id}/removephotos")]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [RequiredScope("Trips.Write")]
     public async Task<IActionResult> RemovePhotosAsync(List<PhotoDto> photos, [FromRoute] long id)
     {
         try
