@@ -1,23 +1,26 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System.Net;
 using System.Web.Http;
 using TravelTrack_API.DbContexts;
 using TravelTrack_API.Domain;
 using TravelTrack_API.DTO;
+using TravelTrack_API.MicrosoftGraphModels;
+using TravelTrack_API.Services.MicrosoftGraph;
 
 namespace TravelTrack_API.Services;
 
 public class UserService : IUserService
 {
-    // Note: I'm using this API for login even though its not best practice; 
-    // This is for extra .Net practice while still having a functional login system
     private readonly TravelTrackContext _ctx;
     private readonly IMapper _mapper;
-    public UserService(TravelTrackContext ctx, IMapper mapper)
+    private readonly IMicrosoftGraphService _microsoftGraph;
+    public UserService(TravelTrackContext ctx, IMapper mapper, IMicrosoftGraphService microsoftGraph)
     {
         _ctx = ctx;
         _mapper = mapper;
+        _microsoftGraph = microsoftGraph;
     }
 
     public List<UserDto> GetAll()
@@ -34,6 +37,54 @@ public class UserService : IUserService
 
         List<UserDto> userDTOs = _mapper.Map<List<UserDto>>(users);
         return userDTOs;
+    }
+
+    /********************************************************
+     *  v3 - (1/3) method currently in use 
+     ********************************************************/
+    public async Task<List<B2CExistingUserDto>> GetB2CExistingUsersAsync()
+    {
+        // request user from via Microsoft Graph Api
+        HttpResponseMessage response = await _microsoftGraph.RequestUserIdentitiesAsync();
+
+        // null check response
+        if (response is null)
+        {
+            throw new Exception("Users' response error with Microsoft Graph");
+        }
+
+        ContentOfResponse? content = JsonConvert.DeserializeObject<ContentOfResponse>(response.Content.ReadAsStringAsync().Result);
+
+        // null check content
+        if (content is null || content.value is null)
+        {
+            throw new Exception("Users' repsonse content error with Microsoft Graph");
+        }
+
+        string serializedContent = JsonConvert.SerializeObject(content.value); //update: might need changed back to value. take out json prop
+        List<MicrosoftGraphUser>? graphUsers = JsonConvert.DeserializeObject<List<MicrosoftGraphUser>>(serializedContent);
+
+        List<B2CExistingUserDto> existingUsers = new List<B2CExistingUserDto>();
+
+        // map MicrosoftGraphUser to B2CExistingUserDto and add them to existingUsers list
+        foreach (MicrosoftGraphUser graphUser in graphUsers!)
+        {
+            B2CExistingUserDto user = new B2CExistingUserDto();
+            // set id
+            user.Id = graphUser.Id;
+            // parse for username
+            string username = getUsernameFromIdentities(graphUser.Identities);
+
+            // add user if user has proper username (is not an B2C AD admin)
+            if (username != "")
+            {
+                // set username
+                user.Username = username;
+                existingUsers.Add(user);
+            }
+        }
+
+        return existingUsers;
     }
 
     public UserDto Get(string username)
@@ -72,6 +123,105 @@ public class UserService : IUserService
 
         UserDto userDTOs = _mapper.Map<UserDto>(user);
         return userDTOs;
+    }
+
+    /********************************************************
+     *  v3 - (2/3) methods currently in use 
+     ********************************************************/
+    public async Task<B2CUserDto> GetB2CUserByIdAsync(string id)
+    {
+        // request user from via Microsoft Graph Api
+        HttpResponseMessage response = await _microsoftGraph.RequestUserByIdAsync(id);
+
+        // check if user exists
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            throw new HttpResponseException( // 404
+                ResponseMessage(
+                    HttpStatusCode.NotFound,
+                    $"No User with Id = {id}",
+                    "User Id Not Found"
+                )
+            );
+        }
+
+        // assign to user response content object
+        MicrosoftGraphUser? graphUser = JsonConvert.DeserializeObject<MicrosoftGraphUser>(response.Content.ReadAsStringAsync().Result);
+
+        // check for miscellaneous error
+        if (graphUser is null)
+        {
+            throw new Exception($"Something went wrong mapping the user data for user with Id={id}");
+        }
+
+        // map user from request to B2CUserDto object
+        B2CUserDto user = new B2CUserDto
+        {
+            Id = graphUser.Id,
+            Username = getUsernameFromIdentities(graphUser.Identities)!,
+            DisplayName = graphUser.DisplayName!,
+            FirstName = graphUser.GivenName,
+            LastName = graphUser.Surname!,
+        };
+
+        return user;
+    }
+
+    /********************************************************
+    *  v3 - (3/3) methods currently in use 
+    ********************************************************/
+    public async Task<B2CUserDto> GetB2CUserByUsernameAsync(string username)
+    {
+        // request user from via Microsoft Graph Api
+        HttpResponseMessage response = await _microsoftGraph.RequestUserByUsernameAsync(username);
+
+        // null check response
+        if (response is null)
+        {
+            throw new Exception("Users' response error with Microsoft Graph");
+        }
+
+        ContentOfResponse? content = JsonConvert.DeserializeObject<ContentOfResponse>(response.Content.ReadAsStringAsync().Result);
+
+        // null check content
+        if (content is null)
+        {
+            throw new Exception("Users' response content error with Microsoft Graph");
+        }
+
+        // check if user exists
+        if (content.value?.Length == 0)
+        {
+            throw new HttpResponseException( // 404
+                ResponseMessage(
+                    HttpStatusCode.NotFound,
+                    $"No User with Id = {username}",
+                    "User Id Not Found"
+                )
+            );
+        }
+        // re-serialize for json to graphUser mapping
+        string serializedContent = JsonConvert.SerializeObject(content.value[0]);
+        // assign to user response content object
+        MicrosoftGraphUser? graphUser = JsonConvert.DeserializeObject<MicrosoftGraphUser>(serializedContent);
+
+        // check for miscellaneous error
+        if (graphUser is null)
+        {
+            throw new Exception($"Something went wrong mapping the user data for user with Username={username}");
+        }
+
+        // map user from request to B2CUserDto object
+        B2CUserDto user = new B2CUserDto
+        {
+            Id = graphUser.Id,
+            Username = getUsernameFromIdentities(graphUser.Identities)!,
+            DisplayName = graphUser.DisplayName!,
+            FirstName = graphUser.GivenName,
+            LastName = graphUser.Surname!,
+        };
+
+        return user;
     }
 
     public UserDto Add(UserDto user)
@@ -174,8 +324,8 @@ public class UserService : IUserService
         await _ctx.SaveChangesAsync();
     }
 
-    // NOTE: User's can change anything except their Username (at least for the time being)
-    public UserDto Update(string username, UserDto user) // super bad practice.. especially for not using a User Id
+
+    public UserDto Update(string username, UserDto user)
     {
         if (username != user.Username)
         {
@@ -212,7 +362,7 @@ public class UserService : IUserService
         return updatedUser;
     }
 
-    public async Task<UserDto> UpdateAsync(string username, UserDto user) // super bad practice.. especially for not using a User Id
+    public async Task<UserDto> UpdateAsync(string username, UserDto user)
     {
         if (username != user.Username)
         {
@@ -257,5 +407,19 @@ public class UserService : IUserService
             Content = new ResponseContent.JsonContent(content),
             ReasonPhrase = reasonPhrase
         };
+    }
+
+    private string getUsernameFromIdentities(List<MicrosoftGraphUserIdentity> userIdentities)
+    {
+        foreach (MicrosoftGraphUserIdentity identity in userIdentities)
+        {
+            // gets username (email) from the correct identity type
+            if (identity.SignInType == "emailAddress")
+            {
+                return identity.IssuerAssignedId!;
+            }
+        }
+        // if signInType is federated, userPrincipalName, etc. then ignore
+        return "";
     }
 }

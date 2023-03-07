@@ -13,6 +13,9 @@ namespace Users.Controllers;
 /// Handles incoming user related Http Requests
 /// </summary>
 [ApiController]
+[ApiVersion("1.0")]
+[ApiVersion("2.0")]
+[ApiVersion("3.0")]
 [Produces("application/json")]
 [Consumes("application/json")]
 [Route("api/[controller]")]
@@ -78,6 +81,30 @@ public class UsersController : ControllerBase
             return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
+
+    [ApiVersion("3.0")]
+    [HttpGet]
+    [ProducesResponseType(typeof(List<B2CUserDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [RequiredScope("User.Read")]
+    public async Task<ActionResult<List<UserDto>>> GetB2CExistingUsersAsync()
+    {
+        try
+        {
+            // gets usernames and ids for all users
+            return new OkObjectResult(await _userService.GetB2CExistingUsersAsync()); // 200
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+    }
+
 
     /// <summary>
     /// Returns a user when given an existing username
@@ -149,6 +176,42 @@ public class UsersController : ControllerBase
             return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
+
+    [ApiVersion("3.0")]
+    [HttpGet("{username}")]
+    [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [RequiredScope("User.Read")]
+    public async Task<ActionResult<B2CUserDto>> GetB2CUserByUsernameAsync(string username)
+    {
+        try
+        {
+            // gets B2C user object from Microsoft Graph
+            return new OkObjectResult(await _userService.GetB2CUserByUsernameAsync(username));
+        }
+        catch (http.HttpResponseException e)
+        {
+            if (e.Response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return new NotFoundObjectResult(e.Response); // 404
+            }
+            // log to Application Insights
+            _logger.LogError(e, e.Response.ToString());
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+        catch (Exception e)
+        {
+            // log to Application Insights
+            _logger.LogError(e, e.Message);
+
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+    }
+
 
     /// <summary>
     /// Creates a new user

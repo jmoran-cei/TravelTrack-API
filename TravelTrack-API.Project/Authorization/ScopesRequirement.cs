@@ -33,7 +33,7 @@ namespace TravelTrack_API.Authorization.Policies
 
             if (scopeClaim != null && scopeClaim.Value.Split(' ').Intersect(requirement._acceptedScopes).Any())
             {
-                context.Succeed(requirement);
+                context!.Succeed(requirement);
             }
 
             return Task.CompletedTask;

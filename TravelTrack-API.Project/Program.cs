@@ -10,6 +10,7 @@ using TravelTrack_API.Authorization.Policies;
 using TravelTrack_API.DbContexts;
 using TravelTrack_API.Services;
 using TravelTrack_API.Services.BlobManagement;
+using TravelTrack_API.Services.MicrosoftGraph;
 
 var builder = WebApplication.CreateBuilder(args);
 bool isProduction = builder.Environment.IsProduction();
@@ -62,14 +63,14 @@ builder.Services.AddAuthorization(options =>
 
     // ---- User scopes ---
     // Create policy to check for the scope 'Read'
-    options.AddPolicy("TripReadScope",
+    options.AddPolicy("UserReadScope",
         policy => policy.Requirements.Add(
             new ScopesRequirement(
                 "https://TravelTrackApp.onmicrosoft.com/TravelTrack/api/User.Read"))
         );
 
     // Create policy to check for the scope 'Write'
-    options.AddPolicy("TripReadScope",
+    options.AddPolicy("UserWriteScope",
         policy => policy.Requirements.Add(
             new ScopesRequirement(
                 "https://TravelTrackApp.onmicrosoft.com/TravelTrack/api/User.Write"))
@@ -134,6 +135,7 @@ builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped<ITripService, TripService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBlobService, BlobService>();
+builder.Services.AddScoped<IMicrosoftGraphService, MicrosoftGraphService>();
 
 builder.Services.AddApiVersioning(options =>
 {
