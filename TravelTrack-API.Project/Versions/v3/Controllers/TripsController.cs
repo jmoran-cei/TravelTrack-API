@@ -155,6 +155,49 @@ namespace TravelTrack_API.Versions.v3.Controllers
             }
         }
 
+
+        /// <summary>
+        /// Updates a trip
+        /// </summary>
+        [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [RequiredScope("Trips.Write")]
+        public async Task<IActionResult> UpdateAsync(long id, TripDto trip)
+        {
+            try
+            {
+                return new OkObjectResult(await _tripService.UpdateAsync(id, trip));
+            }
+            catch (http.HttpResponseException e)
+            {
+                if (e.Response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    return new NotFoundObjectResult(e.Response); // 404
+                }
+                if (e.Response.StatusCode == HttpStatusCode.BadRequest)
+                {
+                    return new BadRequestObjectResult(e.Response); // 400
+                }
+                // log to Application Insights
+                _logger.LogError(e, e.Response.ToString());
+
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            }
+            catch (Exception e)
+            {
+                // log to Application Insights
+                _logger.LogError(e, e.Message);
+
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+
         /// <summary>
         /// Removes a trip when provided an existing trip id
         /// </summary>
