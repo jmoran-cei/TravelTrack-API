@@ -18,17 +18,16 @@ public class Trip
     public string ImgURL { get; set; } = string.Empty;
     [Required]
     public List<TripDestination> Destinations { get; set; }
-    [Required]
     public List<TripUser> Members { get; set; }
+    public List<TripB2CUser> B2CMembers { get; set; }
     public List<ToDo> ToDo { get; set; } = new List<ToDo>();
     public List<Photo> Photos { get; set; } = new List<Photo>();
-
-
 
     public Trip()
     {
         Destinations = new List<TripDestination>();
         Members = new List<TripUser>();
+        B2CMembers = new List<TripB2CUser>();
     }
 }
 
@@ -53,7 +52,6 @@ public class Destination
 
 public class Photo
 {
-    [Required]
     public Guid Id { get; set; }
     public string FileName { get; set; } = string.Empty;
     public string FileType { get; set; } = string.Empty;

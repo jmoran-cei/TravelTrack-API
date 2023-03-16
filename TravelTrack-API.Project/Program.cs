@@ -8,9 +8,11 @@ using Microsoft.OpenApi.Models;
 using TravelTrack_API.Authorization;
 using TravelTrack_API.Authorization.Policies;
 using TravelTrack_API.DbContexts;
-using TravelTrack_API.Services;
-using TravelTrack_API.Services.BlobManagement;
-using TravelTrack_API.Services.MicrosoftGraph;
+using TravelTrack_API.SharedServices.BlobManagement;
+using TravelTrack_API.SharedServices.MicrosoftGraph;
+using v1_Services = TravelTrack_API.Versions.v1.Services;
+using v2_Services = TravelTrack_API.Versions.v2.Services;
+using v3_Services = TravelTrack_API.Versions.v3.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 bool isProduction = builder.Environment.IsProduction();
@@ -25,7 +27,7 @@ builder.Services.AddCors(options =>
         {
             policy.WithOrigins("https://localhost:7194", "http://localhost:4200", "https://bootcamp-traveltrack.azurewebsites.net");
             policy.WithMethods("GET", "POST", "OPTIONS", "PUT", "DELETE");
-            policy.WithHeaders("Content-Type", "X-Api-Key", "X-Api-Version", "Authorization");
+            policy.WithHeaders("Content-Type", "X-Api-Key", "Authorization");
             policy.AllowCredentials();
         });
 });
@@ -85,7 +87,7 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "TravelTrack API",
-        Description = "An ASP.NET Core Web API for TravelTrack",
+        Description = "An ASP.NET Core Web API for TravelTrack v3",
         Contact = new OpenApiContact
         {
             Name = "Jon Moran",
@@ -93,6 +95,30 @@ builder.Services.AddSwaggerGen(c =>
             Url = new Uri("https://www.ceiamerica.com/")
         },
         Version = "v1"
+    });
+    c.SwaggerDoc("v2", new OpenApiInfo
+    {
+        Title = "TravelTrack API",
+        Description = "An ASP.NET Core Web API for TravelTrack v2",
+        Contact = new OpenApiContact
+        {
+            Name = "Jon Moran",
+            Email = "jmoran@ceiamerica.com",
+            Url = new Uri("https://www.ceiamerica.com/")
+        },
+        Version = "v2"
+    });
+    c.SwaggerDoc("v3", new OpenApiInfo
+    {
+        Title = "TravelTrack API",
+        Description = "An ASP.NET Core Web API for TravelTrack v3",
+        Contact = new OpenApiContact
+        {
+            Name = "Jon Moran",
+            Email = "jmoran@ceiamerica.com",
+            Url = new Uri("https://www.ceiamerica.com/")
+        },
+        Version = "v3"
     });
 
     // API Key in Swagger
@@ -132,17 +158,21 @@ builder.Services
     .AddDbContext<TravelTrackContext>(dbContextOptions => dbContextOptions.UseSqlServer(dbConnectionString));
 builder.Services.AddAutoMapper(typeof(Program));
 
-builder.Services.AddScoped<ITripService, TripService>();
-builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<v1_Services.ITripService, v1_Services.TripService>();
+builder.Services.AddScoped<v1_Services.IUserService, v1_Services.UserService>(); 
+builder.Services.AddScoped<v2_Services.ITripService, v2_Services.TripService>();
+builder.Services.AddScoped<v2_Services.IUserService, v2_Services.UserService>(); 
+builder.Services.AddScoped<v3_Services.ITripService, v3_Services.TripService>();
+builder.Services.AddScoped<v3_Services.IUserService, v3_Services.UserService>();
 builder.Services.AddScoped<IBlobService, BlobService>();
 builder.Services.AddScoped<IMicrosoftGraphService, MicrosoftGraphService>();
 
 builder.Services.AddApiVersioning(options =>
 {
-    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.DefaultApiVersion = new ApiVersion(3, 0);
     options.AssumeDefaultVersionWhenUnspecified = true;
-    options.ReportApiVersions = true; // "api-supported-versions: 1.0, 2.0"
-    options.ApiVersionReader = new HeaderApiVersionReader("X-Api-Version");
+    options.ReportApiVersions = true; // "api-supported-versions: 1.0, 2.0, 3.0"
+    options.ApiVersionReader = new UrlSegmentApiVersionReader();
 });
 
 builder.Services.AddVersionedApiExplorer(
@@ -150,6 +180,7 @@ builder.Services.AddVersionedApiExplorer(
     {
         options.GroupNameFormat = "'v'VVV";
     });
+
 
 builder.Services.AddApplicationInsightsTelemetry(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]);
 
@@ -160,7 +191,12 @@ if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TravelTrack v1"));
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "TravelTrack v1");
+        c.SwaggerEndpoint("/swagger/v2/swagger.json", "TravelTrack v2");
+        c.SwaggerEndpoint("/swagger/v3/swagger.json", "TravelTrack v3");
+    });
 }
 
 app.UseCors();
