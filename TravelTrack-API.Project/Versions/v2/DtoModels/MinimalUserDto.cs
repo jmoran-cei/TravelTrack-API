@@ -1,4 +1,4 @@
-namespace TravelTrack_API.Versions.v3.Models
+namespace TravelTrack_API.Versions.v2.DtoModels
 {
     public class MinimalUserDto
     {

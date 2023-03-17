@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using TravelTrack_API.Domain;
-using TravelTrack_API.Versions.v2.Models;
+using TravelTrack_API.Versions.v2.DtoModels;
 
 namespace TravelTrack_API.Versions.v2.Profiles
 {
@@ -8,7 +8,7 @@ namespace TravelTrack_API.Versions.v2.Profiles
     {
         public UserProfile()
         {
-            CreateMap<User, UserDto>().ReverseMap();
+            CreateMap<B2CUser, UserDto>().ReverseMap();
         }
     }
 }

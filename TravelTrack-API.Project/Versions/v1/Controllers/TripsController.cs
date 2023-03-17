@@ -1,11 +1,11 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Authorization;
 using http = System.Web.Http;
 using System.Net;
 using Microsoft.Identity.Web.Resource;
-using TravelTrack_API.Versions.v1.Models;
-using TravelTrack_API.Versions.v1.Services;
+using TravelTrack_API.Versions.v1.DtoModels;
+using TravelTrack_API.SharedServices;
 
 namespace TravelTrack_API.Versions.v1.Controllers
 {
@@ -17,9 +17,9 @@ namespace TravelTrack_API.Versions.v1.Controllers
     [Produces("application/json")]
     [Consumes("application/json")]
     [ControllerName("TripsV1")]
-    [Route("api/v{version:apiVersion}/[controller]")]
+    [Route("api/[controller]/v{version:apiVersion}")]
     [EnableCors()]
-    //[Authorize]
+    [Authorize]
     public class TripsController : ControllerBase
     {
         private readonly ITripService _tripService;
@@ -31,20 +31,22 @@ namespace TravelTrack_API.Versions.v1.Controllers
             _logger = logger;
         }
 
+
         /// <summary>
-        /// Returns all trips, synchronous
+        /// Returns all trips
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(List<TripDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [RequiredScope("Trips.Read")]
-        public ActionResult<List<TripDto>> GetAll()
+        public async Task<ActionResult<List<TripDto>>> GetAllAsync(ApiVersion version)
         {
             try
             {
-                return new OkObjectResult(_tripService.GetAll()); // 200
+                return new OkObjectResult(await _tripService.GetAllAsync()); // 200
             }
             catch (Exception e)
             {
@@ -57,7 +59,7 @@ namespace TravelTrack_API.Versions.v1.Controllers
 
 
         /// <summary>
-        /// Returns a trip when given a existing trip Id, synchronous
+        /// Returns a trip when given a existing trip Id
         /// </summary>
         [HttpGet]
         [Route("{id}")]
@@ -67,11 +69,11 @@ namespace TravelTrack_API.Versions.v1.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [RequiredScope("Trips.Read")]
-        public ActionResult<TripDto> Get([FromRoute] long id)
+        public async Task<ActionResult<TripDto>> GetAsync([FromRoute] long id)
         {
             try
             {
-                return new OkObjectResult(_tripService.Get(id)); // 200
+                return new OkObjectResult(await _tripService.GetAsync(id)); // 200
             }
             catch (http.HttpResponseException e)
             {
@@ -95,21 +97,21 @@ namespace TravelTrack_API.Versions.v1.Controllers
 
 
         /// <summary>
-        /// Creates a new trip, synchronous
+        /// Creates a new trip
         /// </summary>
         [HttpPost]
         [ProducesResponseType(typeof(TripDto), StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [RequiredScope("Trips.Write")]
-        public IActionResult Create(TripDto trip)
+        public async Task<IActionResult> CreateAsync(TripDto trip)
         {
             try
             {
-                var addedTrip = _tripService.Add(trip);
-                return new CreatedAtActionResult(nameof(Create), "Trips", new { id = trip.Id }, trip); // 201
+                var addedTrip = await _tripService.AddAsync(trip);
+                return new CreatedAtActionResult("Create", "TripsV1", new { id = trip.Id }, trip); // 201
             }
             catch (http.HttpResponseException e)
             {
@@ -137,7 +139,7 @@ namespace TravelTrack_API.Versions.v1.Controllers
 
 
         /// <summary>
-        /// Updates a trip, synchronous
+        /// Updates a trip
         /// </summary>
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -147,11 +149,11 @@ namespace TravelTrack_API.Versions.v1.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [RequiredScope("Trips.Write")]
-        public IActionResult Update(long id, TripDto trip)
+        public async Task<IActionResult> UpdateAsync(long id, TripDto trip)
         {
             try
             {
-                return new OkObjectResult(_tripService.Update(id, trip));
+                return new OkObjectResult(await _tripService.UpdateAsync(id, trip));
             }
             catch (http.HttpResponseException e)
             {
@@ -179,8 +181,9 @@ namespace TravelTrack_API.Versions.v1.Controllers
 
 
         /// <summary>
-        /// Deletes a trip, synchronous
+        /// Deletes a trip
         /// </summary>
+        //[Route("api/Trips/v2/{id}")]
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -189,11 +192,11 @@ namespace TravelTrack_API.Versions.v1.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [RequiredScope("Trips.Write")]
-        public IActionResult Delete(long id)
+        public async Task<IActionResult> DeleteAsync(long id)
         {
             try
             {
-                _tripService.Delete(id);
+                await _tripService.DeleteAsync(id);
                 return new NoContentResult(); // 204
             }
             catch (http.HttpResponseException e)
@@ -222,9 +225,8 @@ namespace TravelTrack_API.Versions.v1.Controllers
         }
 
 
-
         /// <summary>
-        /// Adds a photo to a trip and uploads the file to Azure blob storage, synchronous
+        /// Adds a photo to a trip and uploads the file to Azure blob storage
         /// </summary>
         [HttpPut("addphoto/{id}")]
         [Consumes("multipart/form-data")]
@@ -235,14 +237,14 @@ namespace TravelTrack_API.Versions.v1.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [RequiredScope("Trips.Write")]
-        public IActionResult AddPhoto([FromForm] PhotoDto photo, [FromRoute] long id)
+        public async Task<IActionResult> AddPhotoAsync([FromForm] PhotoDto photo, [FromRoute] long id)
         {
             try
             {
                 if (Request.Form.Files.Count() > 0)
                 {
                     IFormFile file = Request.Form.Files[0];
-                    var updatedTrip = _tripService.AddPhotoToTrip(photo, file, id);
+                    var updatedTrip = await _tripService.AddPhotoToTripAsync(photo, file, id);
                     return new OkObjectResult(updatedTrip);
                 }
                 else
@@ -286,21 +288,21 @@ namespace TravelTrack_API.Versions.v1.Controllers
 
 
         /// <summary>
-        /// Removes photos from a trip and deletes the file from Azure blob storage, synchronous
+        /// Removes photos from a trip and deletes the file from Azure blob storage
         /// </summary>
         [HttpPut("removephotos/{id}")]
-        [ProducesResponseType(typeof(TripDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [RequiredScope("Trips.Write")]
-        public IActionResult RemovePhotos(List<PhotoDto> photos, [FromRoute] long id)
+        public async Task<IActionResult> RemovePhotosAsync(List<PhotoDto> photos, [FromRoute] long id)
         {
             try
             {
-                var updatedTrip = _tripService.RemovePhotosFromTrip(photos, id);
+                var updatedTrip = await _tripService.RemovePhotosFromTripAsync(photos, id);
                 return new OkObjectResult(updatedTrip);
             }
             catch (http.HttpResponseException e)
@@ -326,7 +328,6 @@ namespace TravelTrack_API.Versions.v1.Controllers
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }
-
 
     }
 }

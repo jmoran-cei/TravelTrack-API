@@ -1,6 +1,6 @@
 ﻿namespace TravelTrack_API.Domain
 {
-    public class TripB2CUser
+    public class TripB2CUser // v2
     {
         public long TripId { get; set; }
         public Trip Trip { get; set; } = null!;

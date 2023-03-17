@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using TravelTrack_API.Domain;
-using TravelTrack_API.Versions.v1.Models;
+using TravelTrack_API.Versions.v1.DtoModels;
 
 namespace TravelTrack_API.Versions.v1.Profiles
 {

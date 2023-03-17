@@ -1,4 +1,4 @@
-namespace TravelTrack_API.Versions.v1.Models
+namespace TravelTrack_API.Versions.v1.DtoModels
 {
     public class TripDto
     {
@@ -18,7 +18,6 @@ namespace TravelTrack_API.Versions.v1.Models
             Members = new List<TripUserDto>();
         }
     }
-
     public class ToDoDto
     {
         public int Id { get; set; }

@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
 namespace TravelTrack_API.Domain;
-public class B2CUser
+public class B2CUser // v2
 {
     [Key]
     [Required]

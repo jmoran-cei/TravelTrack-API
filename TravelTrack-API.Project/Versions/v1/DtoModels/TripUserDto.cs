@@ -1,4 +1,4 @@
-﻿namespace TravelTrack_API.Versions.v2.Models
+﻿namespace TravelTrack_API.Versions.v1.DtoModels
 {
     // represents a member of a trip
     public class TripUserDto

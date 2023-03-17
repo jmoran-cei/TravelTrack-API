@@ -4,21 +4,23 @@ using Microsoft.AspNetCore.Authorization;
 using http = System.Web.Http;
 using System.Net;
 using Microsoft.Identity.Web.Resource;
-using TravelTrack_API.Versions.v2.Models;
-using TravelTrack_API.Versions.v2.Services;
+using TravelTrack_API.Versions.v1.DtoModels;
+using TripDto = TravelTrack_API.Versions.v2.DtoModels.TripDto;
+using TravelTrack_API.SharedServices;
 
 namespace TravelTrack_API.Versions.v2.Controllers
 {
     /// <summary>
     /// Handles incoming trip related Http Requests
-    /// This version implements all of version 1.0 but asynchronously
+    /// This version implements the Azure Directory B2C connection to the API and appropriate changes needed map TripDto.Members with Trip.B2CMembers entity
     /// </summary>
     [ApiController]
     [ApiVersion("2.0")]
     [Produces("application/json")]
     [Consumes("application/json")]
     [ControllerName("TripsV2")]
-    [Route("api/v{version:apiVersion}/[controller]/")]
+    [Route("api/[controller]")] // newest version is default
+    [Route("api/[controller]/v{version:apiVersion}")]
     [EnableCors()]
     [Authorize]
     public class TripsController : ControllerBase
@@ -32,22 +34,38 @@ namespace TravelTrack_API.Versions.v2.Controllers
             _logger = logger;
         }
 
-
         /// <summary>
-        /// Returns all trips
+        /// Returns a trip when given a existing userId, the trip member data is from respective AD B2C users
         /// </summary>
         [HttpGet]
+        [Route("user/{userId}")]
         [ProducesResponseType(typeof(List<TripDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(TripDto), StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [RequiredScope("Trips.Read")]
-        public async Task<ActionResult<List<TripDto>>> GetAllAsync(ApiVersion version)
+        public async Task<ActionResult<List<TripDto>>> GetTripsByUserIdAsync([FromRoute] string userId, ApiVersion version)
         {
             try
             {
-                return new OkObjectResult(await _tripService.GetAllAsync()); // 200
+                //var userId = "7241d571-59ec-40f7-8730-84de1ff982d6";
+                return new OkObjectResult(await _tripService.GetTripsByUserIdAsync(userId)); // 200
+            }
+            catch (http.HttpResponseException e)
+            {
+                if (e.Response.StatusCode == HttpStatusCode.BadRequest)
+                {
+                    return new BadRequestObjectResult(e.Response); // 400
+                }
+                if (e.Response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    return new NoContentResult(); // 204
+                }
+                // log to Application Insights
+                _logger.LogError(e, e.Response.ReasonPhrase);
+
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
             catch (Exception e)
             {
@@ -58,9 +76,8 @@ namespace TravelTrack_API.Versions.v2.Controllers
             }
         }
 
-
         /// <summary>
-        /// Returns a trip when given a existing trip Id
+        /// Returns a trip when given a existing trip Id, the trip member data is from respective AD B2C users
         /// </summary>
         [HttpGet]
         [Route("{id}")]
@@ -70,11 +87,11 @@ namespace TravelTrack_API.Versions.v2.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [RequiredScope("Trips.Read")]
-        public async Task<ActionResult<TripDto>> GetAsync([FromRoute] long id)
+        public async Task<ActionResult<TripDto>> GetTripAsync([FromRoute] long id)
         {
             try
             {
-                return new OkObjectResult(await _tripService.GetAsync(id)); // 200
+                return new OkObjectResult(await _tripService.GetTripB2CAsync(id)); // 200
             }
             catch (http.HttpResponseException e)
             {
@@ -98,12 +115,13 @@ namespace TravelTrack_API.Versions.v2.Controllers
 
 
         /// <summary>
-        /// Creates a new trip
+        /// Creates a new trip, the trip member data is from respective AD B2C users
         /// </summary>
-        [HttpPost]
+        [HttpPost,]
         [ProducesResponseType(typeof(TripDto), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [RequiredScope("Trips.Write")]
@@ -112,7 +130,7 @@ namespace TravelTrack_API.Versions.v2.Controllers
             try
             {
                 var addedTrip = await _tripService.AddAsync(trip);
-                return new CreatedAtActionResult(nameof(CreateAsync), "Trips", new { id = trip.Id }, trip); // 201
+                return new CreatedAtActionResult("Create", "TripsV2", new { id = trip.Id }, trip); // 201
             }
             catch (http.HttpResponseException e)
             {
@@ -140,7 +158,7 @@ namespace TravelTrack_API.Versions.v2.Controllers
 
 
         /// <summary>
-        /// Updates a trip
+        /// Updates a trip, the trip member data is from respective AD B2C users
         /// </summary>
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -182,7 +200,7 @@ namespace TravelTrack_API.Versions.v2.Controllers
 
 
         /// <summary>
-        /// Deletes a trip
+        /// Removes a trip when provided an existing trip id
         /// </summary>
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -226,7 +244,7 @@ namespace TravelTrack_API.Versions.v2.Controllers
 
 
         /// <summary>
-        /// Adds a photo to a trip and uploads the file to Azure blob storage
+        /// Adds a photo to a trip and uploads the file to Azure blob storage, the trip member data is from respective AD B2C users
         /// </summary>
         [HttpPut("addphoto/{id}")]
         [Consumes("multipart/form-data")]
@@ -244,7 +262,7 @@ namespace TravelTrack_API.Versions.v2.Controllers
                 if (Request.Form.Files.Count() > 0)
                 {
                     IFormFile file = Request.Form.Files[0];
-                    var updatedTrip = await _tripService.AddPhotoToTripAsync(photo, file, id);
+                    var updatedTrip = await _tripService.AddPhotoToB2CTripAsync(photo, file, id);
                     return new OkObjectResult(updatedTrip);
                 }
                 else
@@ -286,9 +304,8 @@ namespace TravelTrack_API.Versions.v2.Controllers
             }
         }
 
-
         /// <summary>
-        /// Removes photos from a trip and deletes the file from Azure blob storage
+        /// Removes photos from a trip and deletes the file from Azure blob storage, the trip member data is from respective AD B2C users
         /// </summary>
         [HttpPut("removephotos/{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -298,11 +315,11 @@ namespace TravelTrack_API.Versions.v2.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [RequiredScope("Trips.Write")]
-        public async Task<IActionResult> RemovePhotosAsync(List<PhotoDto> photos, [FromRoute] long id)
+        public async Task<IActionResult> RemovePhotosFromB2CTripAsync(List<PhotoDto> photos, [FromRoute] long id)
         {
             try
             {
-                var updatedTrip = await _tripService.RemovePhotosFromTripAsync(photos, id);
+                var updatedTrip = await _tripService.RemovePhotosFromB2CTripAsync(photos, id);
                 return new OkObjectResult(updatedTrip);
             }
             catch (http.HttpResponseException e)
@@ -328,6 +345,5 @@ namespace TravelTrack_API.Versions.v2.Controllers
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }
-
     }
 }

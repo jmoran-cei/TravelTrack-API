@@ -2,12 +2,15 @@ using AutoMapper;
 using Newtonsoft.Json;
 using System.Net;
 using System.Web.Http;
+using Microsoft.EntityFrameworkCore;
 using TravelTrack_API.DbContexts;
-using TravelTrack_API.Versions.v3.Models;
+using TravelTrack_API.Domain;
+using TravelTrack_API.Versions.v1.DtoModels;
+using v2 = TravelTrack_API.Versions.v2.DtoModels;
 using TravelTrack_API.MicrosoftGraphModels;
 using TravelTrack_API.SharedServices.MicrosoftGraph;
 
-namespace TravelTrack_API.Versions.v3.Services;
+namespace TravelTrack_API.SharedServices;
 
 public class UserService : IUserService
 {
@@ -22,7 +25,130 @@ public class UserService : IUserService
     }
 
 
-    public async Task<List<MinimalUserDto>> GetB2CExistingUsersAsync()
+    /* * * * * * * * * * * * * * * * * *
+     * Version 1 Methods
+     * * * * * * * * * * * * * * * * * */
+
+    public async Task<List<UserDto>> GetAllAsync()
+    {
+        List<User> users = await _ctx.Users.ToListAsync();
+
+        List<UserDto> userDTOs = _mapper.Map<List<UserDto>>(users);
+        return userDTOs;
+    }
+
+    public async Task<UserDto> GetAsync(string username)
+    {
+        var user = await _ctx.Users.FirstOrDefaultAsync(u => u.Username == username);
+
+        if (user is null)
+        {
+            throw new HttpResponseException( // 404
+                ResponseMessage(
+                    HttpStatusCode.NotFound,
+                    $"No User with Username = {username}",
+                    "Username Not Found"
+                )
+            );
+        }
+
+        UserDto userDTOs = _mapper.Map<UserDto>(user);
+        return userDTOs;
+    }
+
+    public async Task<UserDto> AddAsync(UserDto user)
+    {
+        if (user is null)
+        {
+            throw new HttpResponseException( // 400
+                ResponseMessage(
+                    HttpStatusCode.BadRequest,
+                    "User cannot be null",
+                    "Bad Request: Null User"
+                )
+            );
+        }
+
+        if (await _ctx.Users.FindAsync(user.Username) is not null)
+        {
+            throw new HttpResponseException( // 409
+                ResponseMessage(
+                    HttpStatusCode.Conflict,
+                    $"Username = {user.Username} is not unique",
+                    "Bad Request: Username already exists in the Database"
+                )
+            );
+        }
+
+        User userEntity = _mapper.Map<User>(user);
+        await _ctx.Users.AddAsync(userEntity);
+        await _ctx.SaveChangesAsync();
+
+        return user;
+    }
+
+    public async Task DeleteAsync(string username)
+    {
+        var user = await _ctx.Users.FirstOrDefaultAsync(u => u.Username == username);
+
+        if (user is null)
+        {
+            throw new HttpResponseException( //404
+                ResponseMessage(
+                    HttpStatusCode.NotFound,
+                    $"No User with Username = {username}",
+                    "Username Not Found"
+                )
+            );
+        }
+
+        _ctx.Remove(user);
+        await _ctx.SaveChangesAsync();
+    }
+
+    public async Task<UserDto> UpdateAsync(string username, UserDto user)
+    {
+        if (username != user.Username)
+        {
+            throw new HttpResponseException( //400
+                ResponseMessage(
+                    HttpStatusCode.BadRequest,
+                    $"Username = {username} and provided User Username = {user.Username} do not match",
+                    "Bad Request: Username Mismatch"
+                )
+            );
+        }
+
+        var existingUser = await _ctx.Users.FirstOrDefaultAsync(u => u.Username == username);
+
+        if (existingUser is null)
+        {
+            throw new HttpResponseException( // 404
+                ResponseMessage(
+                    HttpStatusCode.NotFound,
+                    $"No User with Username = {username}",
+                    "Username Not Found"
+                )
+            );
+        }
+
+        existingUser.FirstName = user.FirstName;
+        existingUser.LastName = user.LastName;
+        existingUser.Username = user.Username;
+        existingUser.Password = user.Password;
+
+        await _ctx.SaveChangesAsync();
+
+        var updatedUser = _mapper.Map<UserDto>(existingUser);
+        return updatedUser;
+    }
+
+
+    /* * * * * * * * * * * * * * * * * *
+     * Version 2 Methods
+     * * * * * * * * * * * * * * * * * */
+
+    public async Task<List<v2.MinimalUserDto>> GetB2CExistingUsersAsync()
     {
         // request user from via Microsoft Graph Api
         HttpResponseMessage response = await _microsoftGraph.RequestUserIdentitiesAsync();
@@ -44,12 +170,12 @@ public class UserService : IUserService
         string serializedContent = JsonConvert.SerializeObject(content.value); //update: might need changed back to value. take out json prop
         List<MicrosoftGraphUser>? graphUsers = JsonConvert.DeserializeObject<List<MicrosoftGraphUser>>(serializedContent);
 
-        List<MinimalUserDto> existingUsers = new List<MinimalUserDto>();
+        List<v2.MinimalUserDto> existingUsers = new List<v2.MinimalUserDto>();
 
         // map MicrosoftGraphUser to B2CExistingUserDto and add them to existingUsers list
         foreach (MicrosoftGraphUser graphUser in graphUsers!)
         {
-            MinimalUserDto user = new MinimalUserDto();
+            v2.MinimalUserDto user = new v2.MinimalUserDto();
             // set id
             user.Id = graphUser.Id;
             // parse for username
@@ -67,7 +193,7 @@ public class UserService : IUserService
         return existingUsers;
     }
 
-    public async Task<UserDto> GetB2CUserByIdAsync(string id)
+    public async Task<v2.UserDto> GetB2CUserByIdAsync(string id)
     {
         // request user from via Microsoft Graph Api
         HttpResponseMessage response = await _microsoftGraph.RequestUserByIdAsync(id);
@@ -94,7 +220,7 @@ public class UserService : IUserService
         }
 
         // map user from request to B2CUserDto object
-        UserDto user = new UserDto
+        v2.UserDto user = new v2.UserDto
         {
             Id = graphUser.Id,
             Username = getUsernameFromIdentities(graphUser.Identities)!,
@@ -106,7 +232,7 @@ public class UserService : IUserService
         return user;
     }
 
-    public async Task<UserDto> GetB2CUserByUsernameAsync(string username)
+    public async Task<v2.UserDto> GetB2CUserByUsernameAsync(string username)
     {
         // request user from via Microsoft Graph Api
         HttpResponseMessage response = await _microsoftGraph.RequestUserByUsernameAsync(username);
@@ -148,7 +274,7 @@ public class UserService : IUserService
         }
 
         // map user from request to B2CUserDto object
-        UserDto user = new UserDto
+        v2.UserDto user = new v2.UserDto
         {
             Id = graphUser.Id,
             Username = getUsernameFromIdentities(graphUser.Identities)!,
@@ -159,7 +285,6 @@ public class UserService : IUserService
 
         return user;
     }
-
 
     // ------- private methods -------
     private string getUsernameFromIdentities(List<MicrosoftGraphUserIdentity> userIdentities)
@@ -177,7 +302,11 @@ public class UserService : IUserService
     }
 
 
-    // ------- public http exception method -------
+    /* * * * * * * * * * * * * * * * * *
+     * Shared Methods
+     * * * * * * * * * * * * * * * * * */
+
+    // handle http exceptions
     private HttpResponseMessage ResponseMessage(HttpStatusCode statusCode, string content, string reasonPhrase)
     {
         return new HttpResponseMessage(statusCode)

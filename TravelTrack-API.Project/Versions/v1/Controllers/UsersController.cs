@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 using http = System.Web.Http;
 using System.Net;
 using Microsoft.Identity.Web.Resource;
-using TravelTrack_API.Versions.v1.Models;
-using TravelTrack_API.Versions.v1.Services;
+using TravelTrack_API.Versions.v1.DtoModels;
+using TravelTrack_API.SharedServices;
 
 namespace TravelTrack_API.Versions.v1.Controllers
 {
@@ -17,7 +17,7 @@ namespace TravelTrack_API.Versions.v1.Controllers
     [Produces("application/json")]
     [Consumes("application/json")]
     [ControllerName("UsersV1")]
-    [Route("api/v{version:apiVersion}/[controller]")]
+    [Route("api/[controller]/v{version:apiVersion}")]
     [EnableCors()]
     [Authorize]
     public class UsersController : ControllerBase
@@ -33,7 +33,7 @@ namespace TravelTrack_API.Versions.v1.Controllers
 
 
         /// <summary>
-        /// Returns all users, synchronous
+        /// Returns all users
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(UserDto[]), StatusCodes.Status200OK)]
@@ -41,11 +41,11 @@ namespace TravelTrack_API.Versions.v1.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [RequiredScope("User.Read")]
-        public ActionResult<List<UserDto>> GetAll()
+        public async Task<ActionResult<List<UserDto>>> GetAllAsync()
         {
             try
             {
-                return new OkObjectResult(_userService.GetAll()); // 200
+                return new OkObjectResult(await _userService.GetAllAsync()); // 200
             }
             catch (Exception e)
             {
@@ -58,7 +58,7 @@ namespace TravelTrack_API.Versions.v1.Controllers
 
 
         /// <summary>
-        /// Returns a user when given an existing username, synchronous
+        /// Returns a user when given an existing username
         /// </summary>
         [HttpGet("{username}")]
         [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
@@ -67,11 +67,11 @@ namespace TravelTrack_API.Versions.v1.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [RequiredScope("User.Read")]
-        public ActionResult<UserDto> Get(string username)
+        public async Task<ActionResult<UserDto>> GetAsync(string username)
         {
             try
             {
-                return new OkObjectResult(_userService.Get(username)); // 200
+                return new OkObjectResult(await _userService.GetAsync(username)); // 200
             }
             catch (http.HttpResponseException e)
             {
@@ -95,7 +95,7 @@ namespace TravelTrack_API.Versions.v1.Controllers
 
 
         /// <summary>
-        /// Creates a new user, synchronous
+        /// Creates a new user
         /// </summary>
         [HttpPost]
         [ProducesResponseType(typeof(UserDto), StatusCodes.Status201Created)]
@@ -104,12 +104,12 @@ namespace TravelTrack_API.Versions.v1.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [RequiredScope("User.Write")]
-        public IActionResult Create(UserDto user)
+        public async Task<IActionResult> CreateAsync(UserDto user)
         {
             try
             {
-                var addedUser = _userService.Add(user);
-                return new CreatedAtActionResult(nameof(Create), "Users", new { username = addedUser.Username }, addedUser); // 201
+                var addedUser = await _userService.AddAsync(user);
+                return new CreatedAtActionResult("Create", "Users", new { username = addedUser.Username }, addedUser); // 201
             }
             catch (http.HttpResponseException e)
             {
@@ -139,23 +139,18 @@ namespace TravelTrack_API.Versions.v1.Controllers
             }
         }
 
-
         /// <summary>
-        /// Updates a user, synchronous
+        /// Updates a user
         /// </summary>
         [HttpPut("{username}")]
         [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        [RequiredScope("User.Write")]
-        public IActionResult Update(string username, UserDto user)
+        public async Task<IActionResult> UpdateAsync(string username, UserDto user)
         {
             try
             {
-                return new OkObjectResult(_userService.Update(username, user));
+                return new OkObjectResult(await _userService.UpdateAsync(username, user));
             }
             catch (http.HttpResponseException e)
             {
@@ -181,9 +176,8 @@ namespace TravelTrack_API.Versions.v1.Controllers
             }
         }
 
-
         /// <summary>
-        /// Deletes a user, synchronous
+        /// Deletes a user
         /// </summary>
         [HttpDelete("{username}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -193,11 +187,11 @@ namespace TravelTrack_API.Versions.v1.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [RequiredScope("User.Write")]
-        public IActionResult Delete(string username)
+        public async Task<IActionResult> DeleteAsync(string username)
         {
             try
             {
-                _userService.Delete(username);
+                await _userService.DeleteAsync(username);
                 return new NoContentResult(); // 204
             }
             catch (http.HttpResponseException e)

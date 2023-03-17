@@ -19,7 +19,7 @@ public class Trip
     [Required]
     public List<TripDestination> Destinations { get; set; }
     public List<TripUser> Members { get; set; }
-    public List<TripB2CUser> B2CMembers { get; set; }
+    public List<TripB2CUser> B2CMembers { get; set; } // v2
     public List<ToDo> ToDo { get; set; } = new List<ToDo>();
     public List<Photo> Photos { get; set; } = new List<Photo>();
 
@@ -27,7 +27,7 @@ public class Trip
     {
         Destinations = new List<TripDestination>();
         Members = new List<TripUser>();
-        B2CMembers = new List<TripB2CUser>();
+        B2CMembers = new List<TripB2CUser>(); // v2
     }
 }
 
